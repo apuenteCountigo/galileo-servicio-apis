@@ -18,13 +18,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -562,7 +562,7 @@ public class ApiControlador {
 
         } catch (Exception exception) {
             log.error("(\"Error obteniendo el limite de dispositivos en el dataminer\":) " + exception.getMessage());
-            throw new RuntimeException("Error obteniendo el limite de dispositivos en el dataminer");
+            throw new RuntimeException(exception.getMessage());
         }
 
         URI uri;
@@ -2546,7 +2546,7 @@ public class ApiControlador {
     public ResponseEntity<ArrayList<LicenciaDataMiner>> obtenerLimiteElementosDataMiner() {
 
         try {
-            ConexionId conexionId = new ConexionId(ID_CONNECTION_DATAMINER);
+            ConexionId conexionId = new ConexionId(obtenerIDConnect());
             ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
                     apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId),
                     ResultadoCantidadLicencia.class);
