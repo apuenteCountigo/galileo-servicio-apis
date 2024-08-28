@@ -545,7 +545,10 @@ public class ApiControlador {
      */
     @PostMapping("/salvarbalizaDataMiner")
     public ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
-
+        log.info("@@@@@@@@@@TESTS@@@@@@@@@@@@@@@@");
+        log.info(baliza.getModelo().getId());
+        log.info(baliza.getModelo().getDescripcion());
+        log.info("@@@@@@@@@@END TESTS@@@@@@@@@@@@@@@@");
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
