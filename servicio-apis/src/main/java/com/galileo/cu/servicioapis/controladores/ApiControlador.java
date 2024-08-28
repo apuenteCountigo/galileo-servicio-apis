@@ -542,8 +542,11 @@ public class ApiControlador {
      * @return ResponseEntity
      */
     @PostMapping("/salvarbalizaDataMiner")
-    public  ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
-
+    public ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
+        log.info("@@@@@@@@@@TESTS@@@@@@@@@@@@@@@@");
+        log.info(baliza.getModelo().getId());
+        log.info(baliza.getModelo().getDescripcion());
+        log.info("@@@@@@@@@@END TESTS@@@@@@@@@@@@@@@@");
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
@@ -562,7 +565,6 @@ public class ApiControlador {
             log.error(exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
-
 
         URI uri;
         Conexiones conexiones = baliza.getServidor();
@@ -2540,17 +2542,19 @@ public class ApiControlador {
     }
 
     @PostMapping("/obtenerLimiteElementosDataMiner")
-    public ResponseEntity<ArrayList<LicenciaDataMiner>> obtenerLimiteElementosDataMiner(){
+    public ResponseEntity<ArrayList<LicenciaDataMiner>> obtenerLimiteElementosDataMiner() {
 
         try {
             ConexionId conexionId = new ConexionId(obtenerIDConnect());
-
-            ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId), ResultadoCantidadLicencia.class);
+            ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
+                    apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId),
+                    ResultadoCantidadLicencia.class);
             return ResponseEntity.ok(resultadoCantidadLicencia.getD());
         } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
-            if (e.getMessage().contains("Connect timed out executing POST")){
-                throw new RuntimeException("No existe conexión con el servidor DataMiner, verifique los datos de configuración...");
+            log.error("Error obteniendo cantidad de elementos del servidor dataminer: " + e.getMessage());
+            if (e.getMessage().contains("Connect timed out executing POST")) {
+                throw new RuntimeException(
+                        "Error obteniendo cantidad de elementos del servidor, no existe conexión con el servidor DataMiner...");
             }
             throw new RuntimeException("Error obteniendo cantidad de elementos del servidor dataminer...");
         }
@@ -2677,25 +2681,25 @@ public class ApiControlador {
         return uri;
     }
 
-    //Obtener el ID para conectar a dataminer
-    private String obtenerIDConnect(){
+    // Obtener el ID para conectar a dataminer
+    private String obtenerIDConnect() {
         Conexiones conexion = encontrarConexion("DATAMINER");
         URI uri;
         ConnectAppDataMiner connectAppDataMiner;
 
         try {
-            String uriBuild = "http://"+ conexion.getIpServicio();
-            connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1", null, null);
+            String uriBuild = "http://" + conexion.getIpServicio() + "";
+            connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1",
+                    null, null);
             uri = new URI(uriBuild);
-
         } catch (URISyntaxException e) {
-            log.error("Error accediendo a servidor de DataMiner: {}", e.getMessage());
-            throw new RuntimeException("Error accediendo a servidor de DataMiner, verifique la configuración de la conexión...");
+            log.error("Error accediendo a servidor de DataMiner: " + e.getMessage());
+            throw new RuntimeException(
+                    "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión...");
         }
 
         return apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
     }
-
 
     private Conexiones encontrarConexion(String nombre_conexion) {
         return apisServicio.findConexion(nombre_conexion);
