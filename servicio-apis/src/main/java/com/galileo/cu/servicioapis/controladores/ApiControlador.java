@@ -2688,7 +2688,7 @@ public class ApiControlador {
         ConnectAppDataMiner connectAppDataMiner;
 
         try {
-            String uriBuild = "http://" + conexion.getIpServicio() + "";
+            String uriBuild = "http://" + conexion.getIpServicio();
             connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1",
                     null, null);
             uri = new URI(uriBuild);
