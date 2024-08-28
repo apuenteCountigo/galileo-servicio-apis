@@ -111,7 +111,7 @@ public class ApiControlador {
                 }
 
             } catch (Exception e) {
-                log.error("Error eliminando permisos a usuario final sobre dispositivos..." + e.getMessage());
+                log.error("Error eliminando permisos a usuario final sobre dispositivos...{}", e.getMessage());
             }
         }
 
@@ -184,9 +184,8 @@ public class ApiControlador {
                         obtenerAutorizacionTraccar());
 
                 if (objetivoTraccarList != null) {
-                    Usuarios finalUsuario = usuario;
                     objetivoTraccarList.forEach(objetivoTraccar -> {
-                        usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()),
+                        usuarioEliminarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()),
                                 objetivoTraccar.getId());
                     });
                 }
@@ -539,71 +538,67 @@ public class ApiControlador {
 
     /**
      * descripcion: SALVAR ELEMENTO(BALIZA) EN DATAMINER
-     * 
-     * @param baliza, ip_dataminer
-     * @return Id de baliza guardada
+     * @param baliza, @descripcion: baliza a salvar en dataminer
+     * @return ResponseEntity
      */
     @PostMapping("/salvarbalizaDataMiner")
-    public ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
+    public  ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
 
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
             AtomicInteger elementosCreados = new AtomicInteger();
+            assert licenciaDataMiners != null;
             licenciaDataMiners.forEach(d -> {
                 elementosCreados.set(d.getAmountElementsActive());
                 totalLicencia.set(d.getAmountElementsMaximum());
             });
 
-            if (totalLicencia.equals(elementosCreados)) {
-                throw new RuntimeException(
-                        "Se ha alcanzado el número máximo de elementos permitidos, por favor contacte con un Superadministrador");
+            if (totalLicencia.equals(elementosCreados)){
+                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos, por favor contacte con un Superadministrador");
             }
 
-        } catch (Exception exception) {
-            log.error("(\"Error obteniendo el limite de dispositivos en el dataminer\":) " + exception.getMessage());
+        }catch (Exception exception){
+            log.error(exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
+
 
         URI uri;
         Conexiones conexiones = baliza.getServidor();
         Conexiones conexionTraccar = encontrarConexion("TRACCAR");
         ConnectAppDataMiner connectAppDataMiner;
 
-        // HALLAR LA URI
-        String uriBuild = "http://" + conexiones.getIpServicio() + "";
-        connectAppDataMiner = new ConnectAppDataMiner(null, conexiones.getUsuario(), conexiones.getPassword(), "v1",
-                null, null);
+        //HALLAR LA URI
+        String uriBuild = "http://"+ conexiones.getIpServicio() +"";
+        connectAppDataMiner = new ConnectAppDataMiner(null, conexiones.getUsuario(), conexiones.getPassword(), "v1", null, null);
         try {
             uri = new URI(uriBuild);
         } catch (URISyntaxException e) {
-            log.error("Error en la URL de DataMiner, verifique la configuración de la conexión..." + e);
+            log.error("Error en la URL de DataMiner, verifique la configuración de la conexión..."+e);
             throw new RuntimeException("Error en la URL de DataMiner, verifique la configuración de la conexión");
         }
 
-        // OBTENER IDCONNECT DE DATAMINER
+        //OBTENER IDCONNECT DE DATAMINER
         String idConnect = apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
 
-        // VERIFICAR SI EL NOMBRE DE BALIZA NO ESTA DUPLICADO
+        //VERIFICAR SI EL NOMBRE DE BALIZA NO ESTA DUPLICADO
         ElementoDataMiner elementoDataMiner = new ElementoDataMiner(idConnect, baliza.getClave(), null, null);
         boolean contieneNombre = false;
         try {
-            contieneNombre = apisServicio.obtenerElementoByNameServ(uri, elementoDataMiner)
-                    .contains(elementoDataMiner.getElementName());
+            contieneNombre = apisServicio.obtenerElementoByNameServ(uri, elementoDataMiner).contains(elementoDataMiner.getElementName());
 
-        } catch (Exception exception) {
-            // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
-            // OMITIR Y CONTINUAR
+        }catch (Exception  exception){
+            //EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO. OMITIR Y CONTINUAR
         }
 
-        if (contieneNombre) {
+        if (contieneNombre){
             log.error("EXISTE UN ELEMENTO CON ESE NOMBRE EN DATAMINER");
-            throw new RuntimeException(
-                    "Error, ya existe una baliza con ese nombre en DataMiner, cambielo o contacte al administrador");
+            throw new RuntimeException("Error, ya existe una baliza con ese nombre en DataMiner, cambielo o contacte al administrador");
 
         }
         try {
-            // SALVAR ELEMENTO EN DATAMINER.
+            //SALVAR ELEMENTO EN DATAMINER.
 
             PortsDataMiner portsDataMiner = new PortsDataMiner(
                     "Skyline.DataMiner.Web.Common.v1.DMAElementSerialPortInfo",
@@ -623,7 +618,8 @@ public class ApiControlador {
                     "5055",
                     0,
                     1500,
-                    30000);
+                    30000
+            );
 
             ArrayList<PortsDataMiner> ports = new ArrayList<>();
             ports.add(portsDataMiner);
@@ -634,24 +630,25 @@ public class ApiControlador {
                     "Innova PR400",
                     "Production",
                     "Tracker",
-                    ports);
+                    ports
+            );
             ArrayList<Integer> arrayView = new ArrayList<>();
             arrayView.add(conexiones.getViewIDs());
             DataMiner dataMiner = new DataMiner(idConnect, conexiones.getDmaID(), arrayView, configuracionDataMiner);
 
-            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(uri,
-                    dataMiner);
+            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(uri, dataMiner);
 
-            // AGREGAR A BALIZA:
+            //AGREGAR A BALIZA:
             // DataMiner ID: connectAppResultDataMiner.getD().getDataMinerID())
             // Y Element ID: connectAppResultDataMiner.getD().getID());
 
             baliza.setIdDataminer(String.valueOf(connectAppResultDataMiner.getD().getDataMinerID()));
             baliza.setIdElement(String.valueOf(connectAppResultDataMiner.getD().getID()));
 
-            return ResponseEntity.ok().body(baliza);
-        } catch (Exception exception) {
-            log.error("ERROR EN DATAMINER SALVANDO ELEMENTO :" + exception);
+
+            return  ResponseEntity.ok().body(baliza);
+        }catch (Exception exception){
+            log.error("ERROR EN DATAMINER SALVANDO ELEMENTO :"+exception);
             throw new RuntimeException("Error salvando baliza en dataminer...");
         }
     }
@@ -2543,19 +2540,17 @@ public class ApiControlador {
     }
 
     @PostMapping("/obtenerLimiteElementosDataMiner")
-    public ResponseEntity<ArrayList<LicenciaDataMiner>> obtenerLimiteElementosDataMiner() {
+    public ResponseEntity<ArrayList<LicenciaDataMiner>> obtenerLimiteElementosDataMiner(){
 
         try {
             ConexionId conexionId = new ConexionId(obtenerIDConnect());
-            ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
-                    apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId),
-                    ResultadoCantidadLicencia.class);
+
+            ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId), ResultadoCantidadLicencia.class);
             return ResponseEntity.ok(resultadoCantidadLicencia.getD());
         } catch (Exception e) {
-            log.error("Error obteniendo cantidad de elementos del servidor dataminer: " + e.getMessage());
-            if (e.getMessage().contains("Connect timed out executing POST")) {
-                throw new RuntimeException(
-                        "Error obteniendo cantidad de elementos del servidor, no existe conexión con el servidor DataMiner...");
+            log.error("Error: {}", e.getMessage());
+            if (e.getMessage().contains("Connect timed out executing POST")){
+                throw new RuntimeException("No existe conexión con el servidor DataMiner, verifique los datos de configuración...");
             }
             throw new RuntimeException("Error obteniendo cantidad de elementos del servidor dataminer...");
         }
@@ -2682,25 +2677,25 @@ public class ApiControlador {
         return uri;
     }
 
-    // Obtener el ID para conectar a dataminer
-    private String obtenerIDConnect() {
+    //Obtener el ID para conectar a dataminer
+    private String obtenerIDConnect(){
         Conexiones conexion = encontrarConexion("DATAMINER");
         URI uri;
         ConnectAppDataMiner connectAppDataMiner;
 
         try {
-            String uriBuild = "http://" + conexion.getIpServicio() + "";
-            connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1",
-                    null, null);
+            String uriBuild = "http://"+ conexion.getIpServicio();
+            connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1", null, null);
             uri = new URI(uriBuild);
+
         } catch (URISyntaxException e) {
-            log.error("Error accediendo a servidor de DataMiner: " + e.getMessage());
-            throw new RuntimeException(
-                    "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión...");
+            log.error("Error accediendo a servidor de DataMiner: {}", e.getMessage());
+            throw new RuntimeException("Error accediendo a servidor de DataMiner, verifique la configuración de la conexión...");
         }
 
         return apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
     }
+
 
     private Conexiones encontrarConexion(String nombre_conexion) {
         return apisServicio.findConexion(nombre_conexion);
