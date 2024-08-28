@@ -2552,9 +2552,9 @@ public class ApiControlador {
             return ResponseEntity.ok(resultadoCantidadLicencia.getD());
         } catch (Exception e) {
             log.error("Error obteniendo cantidad de elementos del servidor dataminer: " + e.getMessage());
-            if (e.getMessage().contains("Connect timed out executing POST")) {
+            if (e.getMessage().contains("Connect timed out executing POST") || e.getMessage().contains("Host is unreachable executing POST")) {
                 throw new RuntimeException(
-                        "Error obteniendo cantidad de elementos del servidor, no existe conexión con el servidor DataMiner...");
+                        "No existe conexión con el servidor DataMiner, consulte los datos de conexión...");
             }
             throw new RuntimeException("Error obteniendo cantidad de elementos del servidor dataminer...");
         }
