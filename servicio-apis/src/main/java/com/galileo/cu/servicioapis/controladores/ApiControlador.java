@@ -531,22 +531,14 @@ public class ApiControlador {
         }
     }
 
-    // ************************************************************************************//
-    // ***************************OPERACIONES EN
-    // DATAMINER*********************************//
-    // ************************************************************************************//
-
     /**
      * descripcion: SALVAR ELEMENTO(BALIZA) EN DATAMINER
      * @param baliza, @descripcion: baliza a salvar en dataminer
      * @return ResponseEntity
      */
     @PostMapping("/salvarbalizaDataMiner")
-    public ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
-        log.info("@@@@@@@@@@TESTS@@@@@@@@@@@@@@@@");
-        log.info(baliza.getModelo().getId());
-        log.info(baliza.getModelo().getDescripcion());
-        log.info("@@@@@@@@@@END TESTS@@@@@@@@@@@@@@@@");
+    public  ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
+
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
@@ -557,14 +549,15 @@ public class ApiControlador {
                 totalLicencia.set(d.getAmountElementsMaximum());
             });
 
-            if (totalLicencia.equals(elementosCreados)){
-                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos, por favor contacte con un Superadministrador");
+            if (totalLicencia.get() == elementosCreados.get()){
+                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
             }
 
         }catch (Exception exception){
             log.error(exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
+
 
         URI uri;
         Conexiones conexiones = baliza.getServidor();
@@ -655,14 +648,14 @@ public class ApiControlador {
         }
     }
 
+
     /**
      * descripcion: SALVAR ELEMENTO(OPERACION) EN DATAMINER
-     * 
      * @param operacion
      * @return Id de baliza guardada
      */
     @PostMapping("/salvarOperacionDataMiner")
-    public ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
+    public  ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
@@ -672,36 +665,32 @@ public class ApiControlador {
                 totalLicencia.set(d.getAmountElementsMaximum());
             });
 
-            if (totalLicencia.equals(elementosCreados)) {
-                throw new RuntimeException(
-                        "Se ha alcanzado el número máximo de elementos permitidos, por favor contacte con un Superadministrador");
+            if (totalLicencia.get() == elementosCreados.get()){
+                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
             }
 
-        } catch (Exception exception) {
-            log.error("(\"Error obteniendo el limite de dispositivos en el dataminer\":) " + exception.getMessage());
-            throw new RuntimeException("Error obteniendo el limite de dispositivos en el dataminer");
+        }catch (Exception exception){
+            log.error("Error obteniendo el limite de dispositivos en el dataminer: "+exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
         }
 
-        // VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
-        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
-                null, null);
+
+        //VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
+        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(), null, null);
 
         try {
-            boolean contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner)
-                    .contains(elementoDataMiner.getElementName());
-            if (contieneNombre) {
+            boolean contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner).contains(elementoDataMiner.getElementName());
+            if (contieneNombre){
                 log.error("EXISTE UNA OPERACION CON ESE NOMBRE EN DATAMINER");
-                throw new RuntimeException(
-                        "Error, ya existe una operación con ese nombre, cambielo o contacte al administrador");
+                throw new RuntimeException("Error, ya existe una operación con ese nombre, cambielo o contacte al administrador");
 
             }
-        } catch (Exception exception) {
-            // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
-            // OMITIR Y CONTINUAR
+        }catch (Exception  exception){
+            //EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO. OMITIR Y CONTINUAR
         }
 
         try {
-            // SALVAR ELEMENTO EN DATAMINER.
+            //SALVAR ELEMENTO EN DATAMINER.
             Optional<Unidades> unidad = apisServicio.findUnidadByIdServ(operacion.getUnidades().getId());
 
             PortsDataMiner portsDataMiner = new PortsDataMiner(
@@ -717,47 +706,43 @@ public class ApiControlador {
             ArrayList<PortsDataMiner> ports = new ArrayList<>();
             ports.add(portsDataMiner);
             ConfiguracionDataMiner configuracionDataMiner = new ConfiguracionDataMiner(
-                    unidad.get().getDenominacion() + "_" + operacion.getDescripcion(), // Nombrecompuesto por Unidad y
-                                                                                       // el nombre de operación elegido
+                    unidad.get().getDenominacion()+"_"+operacion.getDescripcion(), //Nombrecompuesto por Unidad y el nombre de operación elegido
                     "TEST_Operacion",
                     "Geolocalizacion Operacion",
                     "Production",
                     "Operation",
-                    ports);
+                    ports
+            );
             Conexiones conexiones = encontrarConexion("DATAMINER");
             ArrayList<Integer> arrayView = new ArrayList<>();
             arrayView.add(conexiones.getViewIDs());
-            DataMiner dataMiner = new DataMiner(ID_CONNECTION_DATAMINER, conexiones.getDmaID(), arrayView,
-                    configuracionDataMiner);
+            DataMiner dataMiner = new DataMiner(ID_CONNECTION_DATAMINER, conexiones.getDmaID(), arrayView, configuracionDataMiner);
 
-            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio
-                    .salvarElementoDataMinerServ(obtenerUriDataMiner(), dataMiner);
+            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(obtenerUriDataMiner(), dataMiner);
 
-            // AGREGAR A OPERACION:
+            //AGREGAR A OPERACION:
             // DataMiner ID: connectAppResultDataMiner.getD().getDataMinerID())
             // Y Element ID: connectAppResultDataMiner.getD().getID());
 
             operacion.setIdDataminer(String.valueOf(connectAppResultDataMiner.getD().getDataMinerID()));
             operacion.setIdElement(String.valueOf(connectAppResultDataMiner.getD().getID()));
 
-            // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
+            //CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
 
             try {
                 GroupTraccar groupTraccar = new GroupTraccar();
                 groupTraccar.setName(operacion.getDescripcion());
-                operacion.setIdGrupo(Long.valueOf(apisServicio
-                        .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
-            } catch (Exception exception) {
-                log.error("ERROR CREANDO GRUPO EN TRACCAR..." + exception);
+                operacion.setIdGrupo(Long.valueOf(apisServicio.crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
+            }catch (Exception exception){
+                log.error("ERROR CREANDO GRUPO EN TRACCAR..."+exception);
                 throw new RuntimeException("Error creando grupo en TRACCAR...");
             }
 
-            return ResponseEntity.ok().body(operacion);
-        } catch (Exception exception) {
-            log.error("ERROR EN DATAMINER SALVANDO OPERACION :" + exception);
-            if (exception.getMessage().contains("Element could not be created")) {
-                throw new RuntimeException(
-                        "Error salvando operacion en DATAMINER, ya existe una operacion con este nombre...");
+            return  ResponseEntity.ok().body(operacion);
+        }catch (Exception exception){
+            log.error("ERROR EN DATAMINER SALVANDO OPERACION :"+exception);
+            if (exception.getMessage().contains("Element could not be created")){
+                throw new RuntimeException("Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
             }
             throw new RuntimeException("Error salvando operacion en DATAMINER...");
         }
