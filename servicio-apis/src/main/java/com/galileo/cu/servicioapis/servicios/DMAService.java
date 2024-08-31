@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class DMAService {
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate = null;
     // private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "crear-operacion-dma")
