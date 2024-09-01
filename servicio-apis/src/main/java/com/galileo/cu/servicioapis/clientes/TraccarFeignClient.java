@@ -11,6 +11,9 @@ import java.util.List;
 @FeignClient(name = "traccar", url = "EMPTY")
 public interface TraccarFeignClient {
 
+    @PostMapping("/api/server")
+    ResponseEntity<String> estadoServerTraccar(URI uri, @RequestHeader("Authorization") String authHeader);
+
     @PostMapping("/api/users")
     ResponseEntity<UsuarioTraccar> salvarUsuarioTraccar(URI uri, @RequestBody UsuarioTraccar usuarioTraccar, @RequestHeader("Authorization") String authHeader);
 

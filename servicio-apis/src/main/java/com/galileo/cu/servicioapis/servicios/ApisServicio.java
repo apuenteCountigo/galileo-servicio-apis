@@ -18,6 +18,8 @@ public interface ApisServicio {
 
     Conexiones findConexion(String nombre_conexion);
 
+    ResponseEntity<String> estadoServerTraccarServ(URI uri, String authHeader);
+
     ResponseEntity<UsuarioTraccar> salvarUsuarioTraccarServ(URI uri, UsuarioTraccar usuarioTraccar, String authHeader);
 
     UsuarioTraccar obtenerUsuarioTraccarServ(URI uri, Integer id, String header);

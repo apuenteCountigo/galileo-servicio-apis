@@ -46,6 +46,11 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
+    public ResponseEntity<String> estadoServerTraccarServ(URI uri, String authHeader) {
+        return traccarFeignClient.estadoServerTraccar(uri, authHeader);
+    }
+
+    @Override
     public ResponseEntity<UsuarioTraccar> salvarUsuarioTraccarServ(URI uri, UsuarioTraccar usuarioTraccar, String authHeader) {
        return traccarFeignClient.salvarUsuarioTraccar(uri, usuarioTraccar, authHeader);
     }

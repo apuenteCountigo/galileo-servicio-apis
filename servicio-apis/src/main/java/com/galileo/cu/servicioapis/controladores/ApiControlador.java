@@ -63,6 +63,16 @@ public class ApiControlador {
     @GetMapping("/mostrarMapaTraccar")
     public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser){
 
+        try {
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+            System.out.println(stringResponseEntity.getBody());
+        } catch (Exception e){
+            log.error("No existe conexion con el servidor TRACCAR, verificar la configuracion: {}", e.getMessage());
+            if (e.getMessage().contains("Connection refused")){
+                new RuntimeException("No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR ");
+            }
+        }
+
         URL url = null;
 
         DecodificarToken decodificarToken =  apisServicio.decodiTokenServ(tokenUser);
@@ -476,16 +486,29 @@ public class ApiControlador {
             @RequestParam("operacioniDGrupo") Integer operacioniDGrupo) {
 
         try {
-            PermisosGroupsTraccar permisosGroupsTraccar = new PermisosGroupsTraccar();
-            permisosGroupsTraccar.setUserId(usuarioTraccarId);
-            permisosGroupsTraccar.setGroupId(operacioniDGrupo);
-            apisServicio.usuarioAgregarPermisoGroupsTraccarServ(obtenerUriTraccar(), permisosGroupsTraccar,
-                    obtenerAutorizacionTraccar());
-            return ResponseEntity.ok().body("Permisos otorgados correctamente");
-        } catch (Exception exception) {
-            log.error("ERROR OTORGANDO PERMISOS A USUARIO EN TRACCAR..." + exception);
-            throw new RuntimeException("Error otorgando permiso a usuario en TRACCAR...");
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), usuarioTraccarId, obtenerAutorizacionTraccar() );
+
+            if (usuarioTraccar != null) {
+                try {
+                    PermisosGroupsTraccar permisosGroupsTraccar = new PermisosGroupsTraccar();
+                    permisosGroupsTraccar.setUserId(usuarioTraccarId);
+                    permisosGroupsTraccar.setGroupId(operacioniDGrupo);
+                    apisServicio.usuarioAgregarPermisoGroupsTraccarServ(obtenerUriTraccar(), permisosGroupsTraccar,
+                            obtenerAutorizacionTraccar());
+                    return ResponseEntity.ok().body("Permisos otorgados correctamente");
+                } catch (Exception exception) {
+                    log.error("ERROR OTORGANDO PERMISOS A USUARIO EN TRACCAR..." + exception);
+                    throw new RuntimeException("Error otorgando permiso a usuario en TRACCAR...");
+                }
+            }
+        }catch (Exception exception){
+            if (exception.getMessage().contains("404 - Not Found")){
+                log.error("No existe el usuario con traccarID: {} en TRACCAR", usuarioTraccarId);
+            } else log.error(exception.getMessage());
+
+            return ResponseEntity.badRequest().body("Permisos otorgados correctamente");
         }
+       return null;
     }
 
     @DeleteMapping("/usuarioPermisoOperacion")
@@ -585,7 +608,7 @@ public class ApiControlador {
         ConnectAppDataMiner connectAppDataMiner;
 
         //HALLAR LA URI
-        String uriBuild = "http://"+ conexiones.getIpServicio() +"";
+        String uriBuild = "http://"+ conexiones.getIpServicio();
         connectAppDataMiner = new ConnectAppDataMiner(null, conexiones.getUsuario(), conexiones.getPassword(), "v1", null, null);
         try {
             uri = new URI(uriBuild);
@@ -2575,13 +2598,13 @@ public class ApiControlador {
         Conexiones conexiones = encontrarConexion("TRACCAR");
         String ipHost = conexiones.getIpServicio();
         String puerto = conexiones.getPuerto();
-        String uriBuild = "http://" + ipHost + ":" + puerto + "";
+        String uriBuild = "http://" + ipHost + ":" + puerto;
 
         URI uri = null;
         try {
             uri = new URI(uriBuild);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+           log.error("Error confeccioando la URI de TRACCAR: {}", e.getMessage());
         }
 
         return uri;
