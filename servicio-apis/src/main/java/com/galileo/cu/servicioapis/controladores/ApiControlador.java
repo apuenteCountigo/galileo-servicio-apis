@@ -58,142 +58,162 @@ public class ApiControlador {
 
     /**
      * description: enviar url mapa embebido de traccar
-     * 
      * @return url de mapa embebido de traccar
      */
     @GetMapping("/mostrarMapaTraccar")
-    public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
+    public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser){
 
         URL url = null;
 
-        DecodificarToken decodificarToken = apisServicio.decodiTokenServ(tokenUser);
+        DecodificarToken decodificarToken =  apisServicio.decodiTokenServ(tokenUser);
 
         Usuarios usuario = new Usuarios();
         try {
             usuario = apisServicio.findUsuarioByIdServ(decodificarToken.getId()).get();
-        } catch (Exception exception) {
-            log.error("Error consultando usuarios para mostrar mapa..." + exception.getMessage());
+        }catch (Exception exception){
+            log.error("Error consultando usuarios para mostrar mapa...{}", exception.getMessage());
         }
 
-        if ((usuario.getTraccarID() != null) && usuario.getPerfil().getDescripcion().equals("Super Administrador")) {
-            try {
-                List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(),
-                        obtenerAutorizacionTraccar());
-                objetivoTraccarList
-                        .forEach(objetivoTraccar -> usuarioAgregarPermisoOjetivo(decodificarToken.getTraccarID(),
-                                objetivoTraccar.getId()));
-            } catch (Exception e) {
-                log.error("Error aplicando permisos a Super Administrador sobre dispositivos..." + e.getMessage());
-            }
-        }
 
-        if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null)
-                && usuario.getPerfil().getDescripcion().equals("Administrador de Unidad")) {
-            try {
-                cambioPerfilSAoUFtoAU(usuario);
-            } catch (Exception e) {
-                log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..." + e.getMessage());
-            }
-        }
+        try {
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar() );
 
-        if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null)
-                && usuario.getPerfil().getDescripcion().equals("Usuario Final")) {
-            try {
-                List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(),
-                        obtenerAutorizacionTraccar());
+            if (usuarioTraccar != null) {
+                try {
+                    if ((usuario.getTraccarID() != null) && usuario.getPerfil().getDescripcion().equals("Super Administrador")){
+                        try {
+                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+                            objetivoTraccarList.forEach(objetivoTraccar -> usuarioAgregarPermisoOjetivo(decodificarToken.getTraccarID() , objetivoTraccar.getId()));
+                        }catch (Exception e){
+                            log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."+e.getMessage());
+                        }
+                    }
 
-                if (objetivoTraccarList != null) {
-                    Usuarios finalUsuario = usuario;
-                    objetivoTraccarList.forEach(objetivoTraccar -> {
-                        usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()),
-                                objetivoTraccar.getId());
-                    });
+                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null) && usuario.getPerfil().getDescripcion().equals("Administrador de Unidad")) {
+                        try {
+                            cambioPerfilSAoUFtoAU(usuario);
+                        }catch (Exception e){
+                            log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."+e.getMessage());
+                        }
+                    }
+
+                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null) && usuario.getPerfil().getDescripcion().equals("Usuario Final")) {
+                        try {
+                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+
+                            if (objetivoTraccarList != null){
+                                Usuarios finalUsuario = usuario;
+                                objetivoTraccarList.forEach(objetivoTraccar -> {
+                                    usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()), objetivoTraccar.getId());
+                                });
+                            }
+
+                        }catch (Exception e){
+                            log.error("Error eliminando permisos a usuario final sobre dispositivos..."+e.getMessage());
+                        }
+                    }
+
+                    try {
+                        if (ID_CONNECTION_DATAMINER == null){
+                            obtenerIDConnectFinal();
+                        }
+                    }catch (Exception exception){
+                        log.error(exception.getMessage());
+                    }
+                }catch (Exception exception){
+                    log.error("Error aplicando permisos de usuario en TRACCAR: {}", exception.getMessage());
                 }
-
-            } catch (Exception e) {
-                log.error("Error eliminando permisos a usuario final sobre dispositivos...{}", e.getMessage());
             }
+        }catch (Exception exception){
+            if (exception.getMessage().contains("404 - Not Found")){
+                log.error("No existe el usuario: {} en TRACCAR", usuario.getTip());
+            } else log.error(exception.getMessage());
         }
 
         try {
-            if (ID_CONNECTION_DATAMINER == null) {
-                obtenerIDConnectFinal();
-            }
 
-            String urlBuild = obtenerUriTraccar() + "/?token=" + decodificarToken.getTraccar();
+            String urlBuild = obtenerUriTraccar()+"/?token="+decodificarToken.getTraccar();
             url = new URL(urlBuild);
             return ResponseEntity.status(HttpStatus.OK).body(url);
         } catch (MalformedURLException e) {
-            log.error("ERROR ACCEDIENDO A TRACCAR: " + e);
+            log.error("ERROR ACCEDIENDO A TRACCAR: "+e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(url);
         }
     }
 
     @PostMapping("/establecerPermisosInicialesUsuarioNuevoTraccar")
-    public void establecerPermisosInicialesUsuarioNuevo(@RequestBody Usuarios usuario) {
+    public void establecerPermisosInicialesUsuarioNuevo(@RequestBody Usuarios usuario){
 
-        // 1 Super Administrador
-        // 2 Administrador de Unidad
-        // 3 Usuario Final
-        // 4 Invitado Externo
+//        1  Super Administrador
+//        2  Administrador de Unidad
+//        3  Usuario Final
+//        4  Invitado Externo
 
-        log.info("Aplicando permisos de usuario nuevo en traccar, usuario: " + usuario.getTip());
+        log.info("Aplicando permisos de usuario nuevo en traccar, usuario: "+usuario.getTip());
 
-        if ((usuario.getTraccarID() != null) && (usuario.getPerfil().getId() == 1)) {
-            try {
-                List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(),
-                        obtenerAutorizacionTraccar());
 
-                log.info("Cantidad de objetivos en traccar: " + objetivoTraccarList.size());
+        try {
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar() );
 
-                // Crear una lista para almacenar los CompletableFuture
-                List<CompletableFuture<Void>> futures = new ArrayList<>();
+            if (usuarioTraccar != null) {
+                if ((usuario.getTraccarID() != null) && (usuario.getPerfil().getId() == 1)){
+                    try {
+                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
 
-                for (ObjetivoTraccar objetivoTraccar : objetivoTraccarList) {
-                    // Crear un CompletableFuture para cada llamada al método
-                    // usuarioAgregarPermisoOjetivo
-                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        usuarioAgregarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()), objetivoTraccar.getId());
-                    });
+                        log.info("Cantidad de objetivos en traccar: "+objetivoTraccarList.size());
 
-                    // Añadir el CompletableFuture a la lista
-                    futures.add(future);
+                        // Crear una lista para almacenar los CompletableFuture
+                        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+                        for (ObjetivoTraccar objetivoTraccar : objetivoTraccarList) {
+                            // Crear un CompletableFuture para cada llamada al método usuarioAgregarPermisoOjetivo
+                            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                                usuarioAgregarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()), objetivoTraccar.getId());
+                            });
+
+                            // Añadir el CompletableFuture a la lista
+                            futures.add(future);
+                        }
+
+                        // Esperar a que todos los CompletableFuture se completen
+                        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+                    }catch (Exception e){
+                        log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."+e.getMessage());
+                        throw new RuntimeException("Error aplicando permisos a Super Administrador sobre dispositivos...");
+                    }
                 }
 
-                // Esperar a que todos los CompletableFuture se completen
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-            } catch (Exception e) {
-                log.error("Error aplicando permisos a Super Administrador sobre dispositivos..." + e.getMessage());
-                throw new RuntimeException("Error aplicando permisos a Super Administrador sobre dispositivos...");
-            }
-        }
-
-        if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null) && (usuario.getPerfil().getId() == 2)) {
-            try {
-                cambioPerfilSAoUFtoAU(usuario);
-            } catch (Exception e) {
-                log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..." + e.getMessage());
-                throw new RuntimeException("Error aplicando permisos a Administrador de Unidad sobre dispositivos...");
-            }
-        }
-
-        if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null) && (usuario.getPerfil().getId() == 3)) {
-            try {
-                List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(),
-                        obtenerAutorizacionTraccar());
-
-                if (objetivoTraccarList != null) {
-                    objetivoTraccarList.forEach(objetivoTraccar -> {
-                        usuarioEliminarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()),
-                                objetivoTraccar.getId());
-                    });
+                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null) && (usuario.getPerfil().getId() == 2)) {
+                    try {
+                        cambioPerfilSAoUFtoAU(usuario);
+                    }catch (Exception e){
+                        log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."+e.getMessage());
+                        throw new RuntimeException("Error aplicando permisos a Administrador de Unidad sobre dispositivos...");
+                    }
                 }
 
-            } catch (Exception e) {
-                log.error("Error eliminando permisos a usuario final sobre dispositivos..." + e.getMessage());
-                throw new RuntimeException("Error eliminando permisos a usuario final sobre dispositivos...");
+                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null) && (usuario.getPerfil().getId() == 3)) {
+                    try {
+                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+
+                        if (objetivoTraccarList != null){
+                            Usuarios finalUsuario = usuario;
+                            objetivoTraccarList.forEach(objetivoTraccar -> {
+                                usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()), objetivoTraccar.getId());
+                            });
+                        }
+
+                    }catch (Exception e){
+                        log.error("Error eliminando permisos a usuario final sobre dispositivos..."+e.getMessage());
+                        throw new RuntimeException("Error eliminando permisos a usuario final sobre dispositivos...");
+                    }
+                }
             }
+        } catch (Exception exception){
+            if (exception.getMessage().contains("404 - Not Found")){
+                log.error("No existe el usuario: {} en TRACCAR", usuario.getTip());
+            } else log.error(exception.getMessage());
         }
     }
 
