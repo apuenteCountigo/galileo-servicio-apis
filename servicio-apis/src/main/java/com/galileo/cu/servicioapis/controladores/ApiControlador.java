@@ -1321,12 +1321,37 @@ public class ApiControlador {
     @PostMapping("/aplicarConfiguracionLed")
     public ResponseEntity<String> aplicarConfiguracionLed(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración LED";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6700, String.valueOf(1));
         } catch (Exception exception) {
             log.error("ERROR CONFIGURANDO LED DE BALIZA :" + exception);
             throw new RuntimeException("Error configurando led de baliza...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
