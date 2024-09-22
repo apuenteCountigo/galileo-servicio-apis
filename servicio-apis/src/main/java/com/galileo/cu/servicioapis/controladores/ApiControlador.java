@@ -73,9 +73,7 @@ public class ApiControlador {
         ValidateAuthorization val = new ValidateAuthorization();
         try {
             log.info("*****CONTROLADOR testTraza*****");
-            val.setObjectMapper(objectMapper);
-            val.setReq(req);
-            if (!val.Validate()) {
+            if (!val.Validate(req, objectMapper)) {
                 log.error("Fallo el Usuario Enviado no Coincide con el Autenticado ");
                 throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado ");
             }
@@ -1285,12 +1283,37 @@ public class ApiControlador {
     @PostMapping("/nuevoEstadoConfiguracionLED")
     public ResponseEntity<String> nuevoEstadoConfiguracionLED(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer estadoConfLed) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo estado de configuración LED";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4910, String.valueOf(estadoConfLed));
+            log.info(sat);
         } catch (Exception exception) {
-            log.error("ERROR CONFIGURANDO LED DE BALIZA :" + exception);
-            throw new RuntimeException("Error configurando led de baliza...");
+            log.error(err, exception);
+            throw new RuntimeException(err);
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }

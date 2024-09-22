@@ -25,14 +25,13 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Service
 public class ValidateAuthorization {
-    public ObjectMapper objectMapper;
-    public HttpServletRequest req;
     public JwtObjectMap jwtObjectMap;
 
-    public boolean Validate() {
+    public boolean Validate(HttpServletRequest req, ObjectMapper objectMapper) {
         if (req == null) {
             throw new RuntimeException("Error Validando Autorización la Petición no debe ser Nula ");
         }
+
         log.info("ValidateAuthorization**********************");
         log.info(req.getHeader("Authorization"));
         log.info("METHOD: " + req.getMethod());
