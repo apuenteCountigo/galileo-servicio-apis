@@ -8,6 +8,7 @@ import com.galileo.cu.servicioapis.repositorios.ObjetivoRepository;
 import com.galileo.cu.servicioapis.repositorios.OperacionRepository;
 import com.galileo.cu.servicioapis.servicios.ApisServicio;
 import com.galileo.cu.servicioapis.servicios.ConexionService;
+import com.galileo.cu.servicioapis.servicios.TrazabilidadService;
 import com.galileo.cu.servicioapis.servicios.ValidateAuthorization;
 import com.galileo.cu.servicioapis.utils.Utils;
 import com.google.gson.Gson;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ApiControlador {
     private final HttpServletRequest req;
     private final ObjectMapper objectMapper;
+    private final TrazabilidadService traza;
 
     private final BalizaRepository balizaRepository;
 
@@ -49,7 +51,8 @@ public class ApiControlador {
 
     public ApiControlador(ApisServicio apisServicio, OperacionRepository operacionRepository,
             ObjetivoRepository objetivoRepository, ConexionService conexionService,
-            BalizaRepository balizaRepository, HttpServletRequest req, ObjectMapper objectMapper) {
+            BalizaRepository balizaRepository, HttpServletRequest req, ObjectMapper objectMapper,
+            TrazabilidadService traza) {
         this.apisServicio = apisServicio;
         this.operacionRepository = operacionRepository;
         this.objetivoRepository = objetivoRepository;
@@ -57,6 +60,7 @@ public class ApiControlador {
         this.balizaRepository = balizaRepository;
         this.objectMapper = objectMapper;
         this.req = req;
+        this.traza = traza;
     }
 
     // ************************************************************************************//
@@ -66,9 +70,9 @@ public class ApiControlador {
 
     @GetMapping("/testTraza")
     public ResponseEntity<String> testTraza() {
+        ValidateAuthorization val = new ValidateAuthorization();
         try {
             log.info("*****CONTROLADOR testTraza*****");
-            ValidateAuthorization val = new ValidateAuthorization();
             val.setObjectMapper(objectMapper);
             val.setReq(req);
             if (!val.Validate()) {
@@ -79,6 +83,9 @@ public class ApiControlador {
             log.error("Fallo Antes de Crear el Elemento Validando Autorización: ", e.getMessage());
             throw new RuntimeException("Fallo Antes de Crear el Elemento Validando Autorización: " + e.getMessage());
         }
+
+        traza.ActualizarTraza(val, 0, 7, 1, "Fue Asignada una alarma nueva", "Fallo asignando nueva alarma");
+
         return ResponseEntity.ok().body("OK");
     }
 
