@@ -1388,6 +1388,21 @@ public class ApiControlador {
     @PostMapping("/nuevoUmbralSensibilidad")
     public ResponseEntity<String> nuevoUmbralSensibilidad(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valor) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Umbral de Sensibilidad";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         // CONFIGURAR APLICAR configuración LED BALIZA
         try {
             if (valor > 0 && valor < 9) {
@@ -1404,18 +1419,52 @@ public class ApiControlador {
                 throw new RuntimeException("Error configurando nuevo umbral de sensibilidad baliza...");
         }
 
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
+
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     @PostMapping("/aplicarUmbralSensibilidad")
     public ResponseEntity<String> aplicarUmbralSensibilidad(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "Umbral de Sensibilidad";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado el " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6701, String.valueOf(1));
         } catch (Exception exception) {
             log.error("ERROR CONFIGURANDO UMBRAL DE SENSIBILIDAD :" + exception);
             throw new RuntimeException("Error configurando umbral de sesibilidad de baliza...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
