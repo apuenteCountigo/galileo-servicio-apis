@@ -1,5 +1,6 @@
 package com.galileo.cu.servicioapis.servicios;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -12,10 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class DMAService {
-    private final KafkaTemplate<String, String> kafkaTemplate = null;
-    // private final ObjectMapper objectMapper;
+    // @Autowired
+    // KafkaTemplate<String, String> kafkaTemplate;
 
-    @KafkaListener(topics = "crear-operacion-dma")
+    // @Autowired
+    // ObjectMapper objectMapper;
+
+    // @KafkaListener(topics = "crear-operacion-dma")
     public void crearOperacionDMA(String mensaje) throws JsonProcessingException {
         log.info("crearOperacionDMA::::" + mensaje);
         // OperacionDTO operacion = objectMapper.readValue(mensaje, OperacionDTO.class);
