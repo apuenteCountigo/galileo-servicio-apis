@@ -1591,6 +1591,21 @@ public class ApiControlador {
     @PostMapping("/nuevoTemporalizadorSegundos")
     public ResponseEntity<String> nuevoTemporalizadorSegundos(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valor_temporizador) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Modem Temporizador";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 5918, String.valueOf(valor_temporizador));
         } catch (Exception exception) {
@@ -1598,18 +1613,52 @@ public class ApiControlador {
             throw new RuntimeException("Error configurando nuevo temporizador segundos de baliza...");
         }
 
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
+
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     @PostMapping("/aplicarModemTemporizador")
     public ResponseEntity<String> aplicarModemTemporizador(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "Modem Temporizador";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado el " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 5951, String.valueOf(1));
         } catch (Exception exception) {
             log.error("Error configurando modem temporizador de baliza :" + exception);
             throw new RuntimeException("Error configurando modem temporizador de baliza...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
