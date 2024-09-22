@@ -1746,12 +1746,36 @@ public class ApiControlador {
     @PostMapping("/nuevoVoltApag")
     public ResponseEntity<String> nuevoVoltApag(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam Integer nuevoVoltApag) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo voltaje de apagado";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 5925, String.valueOf(nuevoVoltApag));
         } catch (Exception exception) {
             log.error("Error configurando Nuevo Voltaje Apagado: " + exception);
             throw new RuntimeException("Error configurando Nuevo Voltaje Apagado...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
