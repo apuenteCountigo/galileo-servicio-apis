@@ -1702,6 +1702,20 @@ public class ApiControlador {
     @PostMapping("/confAlarmaPais")
     public ResponseEntity<String> confAlarmaPais(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam Integer confAlarmaPais) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración de alarma país";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creada una " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
 
         try {
             establecerParametroString(idDataminer, idElement, 9001, String.valueOf(confAlarmaPais));
@@ -1709,6 +1723,15 @@ public class ApiControlador {
             log.error("Error configurando alarma país: " + exception);
             throw new RuntimeException("Error configurando alarma país...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
