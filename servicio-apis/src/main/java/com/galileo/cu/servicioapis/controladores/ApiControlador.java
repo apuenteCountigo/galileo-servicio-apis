@@ -1312,7 +1312,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(estadoConfLed),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1350,7 +1350,7 @@ public class ApiControlador {
                 7,
                 3,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(1),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1425,7 +1425,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(valor),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1463,7 +1463,7 @@ public class ApiControlador {
                 7,
                 3,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(1),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1528,7 +1528,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(estadoDetecSoni),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1566,7 +1566,7 @@ public class ApiControlador {
                 7,
                 3,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(1),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1619,7 +1619,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(valor_temporizador),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1657,7 +1657,7 @@ public class ApiControlador {
                 7,
                 3,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(1),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1730,7 +1730,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(confAlarmaPais),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1774,7 +1774,7 @@ public class ApiControlador {
                 7,
                 1,
                 sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
-                        + idElement,
+                        + idElement + ", Valor: " + String.valueOf(nuevoVoltApag),
                 err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
@@ -1790,6 +1790,21 @@ public class ApiControlador {
     @PostMapping("/nuevoVoltEncen")
     public ResponseEntity<String> nuevoVoltEncen(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam Integer nuevoVoltEncen) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo voltaje de encendido";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 5927, String.valueOf(nuevoVoltEncen));
         } catch (Exception exception) {
@@ -1797,17 +1812,51 @@ public class ApiControlador {
             throw new RuntimeException("Error configurando Nuevo Voltaje Encendido...");
         }
 
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(nuevoVoltEncen),
+                err + " en la trazabilidad");
+
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     @PostMapping("/aplicarUmbralUPS")
     public ResponseEntity<String> aplicarUmbralUPS(@RequestParam Integer idDataminer, @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "Umbral UPS";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 5953, String.valueOf(1));
         } catch (Exception exception) {
             log.error("Error configurando detector sonido de baliza :" + exception);
             throw new RuntimeException("Error configurando detector sonido de baliza...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(1),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1845,12 +1894,36 @@ public class ApiControlador {
     @PostMapping("/nuevaConfiguracionGpsBaliza")
     public ResponseEntity<String> nuevaConfiguracionGpsBaliza(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorGps) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nueva configuración GPS";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado una " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4217, String.valueOf(valorGps));
         } catch (Exception exception) {
             log.error("ERROR CONFIGURANDO GPS :" + exception);
             throw new RuntimeException("Error configurando gps...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorGps),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1863,12 +1936,36 @@ public class ApiControlador {
     @PostMapping("/nuevoTiempoAdquisMovBaliza")
     public ResponseEntity<String> nuevoTiempoAdquiMovBaliza(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorTiempAdquisMov) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Tiempo de Adquisición en Movimiento (seg)";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4227, String.valueOf(valorTiempAdquisMov));
         } catch (Exception exception) {
             log.error("ERROR Nuevo Tiempo Adquisición en Movimiento (seg) :" + exception);
             throw new RuntimeException("Error configurando nuevo tiempo adquisición en movimiento (seg)...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorTiempAdquisMov),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1881,6 +1978,21 @@ public class ApiControlador {
     @PostMapping("/nuevoTiempoAdquisEstacioBaliza")
     public ResponseEntity<String> nuevoTiempoAdquisEstacioBaliza(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorTiempAdquisEst) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Tiempo de Adquisición en Estacionamiento (horas)";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4237, String.valueOf(valorTiempAdquisEst));
         } catch (Exception exception) {
@@ -1888,6 +2000,15 @@ public class ApiControlador {
             throw new RuntimeException(
                     "Error configurando nuevo tiempo adquisición en estacionamiento (horas) de la baliza ...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorTiempAdquisEst),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1900,12 +2021,36 @@ public class ApiControlador {
     @PostMapping("/nuevoTiempoPreAdquisBaliza")
     public ResponseEntity<String> nuevoTiempoPreAdquisBaliza(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorTiempPreAdquis) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Tiempo de Pre-Adquisición (seg)";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4247, String.valueOf(valorTiempPreAdquis));
         } catch (Exception exception) {
             log.error("ERROR configurando Nuevo Tiempo Pre-Adquisición (seg) :" + exception);
             throw new RuntimeException("Error configurando  nuevo tiempo pre-adquisición (seg)...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorTiempPreAdquis),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1918,12 +2063,37 @@ public class ApiControlador {
     @PostMapping("/aplicarConfiguracionGps")
     public ResponseEntity<String> aplicarConfiguracionGps(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración GPS";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6007, String.valueOf(1));
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración GPS :" + exception);
             throw new RuntimeException("Error aplicando configuración gps...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(1),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -1968,6 +2138,21 @@ public class ApiControlador {
     @PostMapping("/nuevoIntervaloDescargaBaliza")
     public ResponseEntity<String> nuevoIntervaloDescargaBaliza(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorIntervaloMin) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo Intervalo Descarga (min)";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
 
             if (valorIntervaloMin >= 5 && valorIntervaloMin <= 20) {
@@ -1981,6 +2166,15 @@ public class ApiControlador {
             throw new RuntimeException("Error aplicando  nuevo intervalo descarga (min)...");
         }
 
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorIntervaloMin),
+                err + " en la trazabilidad");
+
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
@@ -1992,12 +2186,37 @@ public class ApiControlador {
     @PostMapping("/aplicarConfiguracionGPSLive")
     public ResponseEntity<String> aplicarConfiguracionGPSLive(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración GPS LIVE";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6507, String.valueOf(1));
         } catch (Exception exception) {
             log.error("ERROR al Aplicar Configuración GPSLive :" + exception);
             throw new RuntimeException("Error al aplicar configuración gpslive...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(1),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2024,13 +2243,39 @@ public class ApiControlador {
     @PostMapping("/aplicarEstadoReceptorGlonass")
     public ResponseEntity<?> aplicarEstadoReceptorGlonass(@RequestParam("idDataminer") Integer idDataminer,
             @RequestParam("idElement") Integer idElement, @RequestParam Integer valorNueEstRecepGlonass) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "estado Receptor Glonass";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4218, String.valueOf(valorNueEstRecepGlonass));
-            return obtenerParametroBaliza(idDataminer, idElement, 4218);
         } catch (Exception exception) {
             log.error("ERROR OBTENIENDO Nuevo Estado Receptor Glonass DE LA BALIZA :" + exception);
             throw new RuntimeException("Error obteniendo nuevo estado receptor glonass de la baliza...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorNueEstRecepGlonass),
+                err + " en la trazabilidad");
+
+        return obtenerParametroBaliza(idDataminer, idElement, 4218);
     }
 
     /*
@@ -2042,12 +2287,36 @@ public class ApiControlador {
     @PostMapping("/nuevoEstadoReceptorGlonass")
     public ResponseEntity<String> nuevoEstadoReceptorGlonass(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer valorRecepGlonass) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo estado Receptor Glonass";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creado un " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 4218, String.valueOf(valorRecepGlonass));
         } catch (Exception exception) {
             log.error("ERROR aplicando Nuevo Estado Receptor Glonass :", exception);
             throw new RuntimeException("Error aplicando nuevo estado receptor glonass...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorRecepGlonass),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2060,12 +2329,38 @@ public class ApiControlador {
     @PostMapping("/aplicarConfiguracionGlonass")
     public ResponseEntity<String> aplicarConfiguracionGlonass(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración Glonass";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6008, String.valueOf(1));
         } catch (Exception exception) {
             log.error("ERROR al Aplicar Configuración Glonass :" + exception);
             throw new RuntimeException("Error al aplicar configuración glonass...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(1),
+                err + " en la trazabilidad");
+
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
@@ -2096,14 +2391,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoCargaBateria")
     public ResponseEntity<String> emailAvisoCargaBateria(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailCargaBateria) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de carga de batería";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2015, emailCargaBateria);
-            return ResponseEntity.accepted().body("Baliza configurada...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso carga bateria :" + exception);
             throw new RuntimeException("Error aplicando emails aviso carga batería...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailCargaBateria),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     /*
@@ -2113,14 +2433,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoInicioMov")
     public ResponseEntity<String> emailAvisoInicioMovimiento(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailAvisoInicioMov) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de inicio de movimiento";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2016, emailAvisoInicioMov);
-            return ResponseEntity.accepted().body("Emails aviso inicio de movimiento configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso inicio de movimiento :" + exception);
             throw new RuntimeException("Error aplicando emails aviso inicio de movimiento...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailAvisoInicioMov),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Emails aviso inicio de movimiento configurado...");
     }
 
     /*
@@ -2130,14 +2475,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoFinMovi")
     public ResponseEntity<String> emailAvisoFinMovimiento(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailAvisoFinMovi) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de fin de movimiento";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2019, emailAvisoFinMovi);
-            return ResponseEntity.accepted().body("Emails aviso fin de movimiento configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso fin de movimiento :" + exception);
             throw new RuntimeException("Error aplicando Emails aviso fin de movimiento...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailAvisoFinMovi),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Emails aviso fin de movimiento configurado...");
     }
 
     /*
@@ -2147,14 +2517,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoEntraGeo")
     public ResponseEntity<String> emailAvisoEntradaGeocerca(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailAvisoEntraGeo) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de entrada a geocercas";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2020, emailAvisoEntraGeo);
-            return ResponseEntity.accepted().body("Emails aviso entrada en geocerca configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso entrada en geocerca :" + exception);
             throw new RuntimeException("ERROR aplicando Emails aviso entrada en geocerca...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailAvisoEntraGeo),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Emails aviso entrada en geocerca configurado...");
     }
 
     /*
@@ -2164,14 +2559,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoSalGeo")
     public ResponseEntity<String> emailAvisoSalidaGeocerca(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailAvisoSalGeo) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de salida de geocercas";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2021, emailAvisoSalGeo);
-            return ResponseEntity.accepted().body("Emails aviso salida de geocerca configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso salida de geocerca :" + exception);
             throw new RuntimeException("Error aplicando emails aviso salida de geocerca...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailAvisoSalGeo),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Emails aviso salida de geocerca configurado...");
     }
 
     /*
@@ -2181,14 +2601,39 @@ public class ApiControlador {
     @PostMapping("/emailAvisoCambioPais")
     public ResponseEntity<String> emailAvisoCambioPais(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String emailAvisoCambioPais) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "email para aviso de cambio de país";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2027, emailAvisoCambioPais);
-            return ResponseEntity.accepted().body("Emails aviso cambio de pais configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Emails aviso cambio de pais :" + exception);
             throw new RuntimeException("Error aplicando Emails aviso cambio de pais...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(emailAvisoCambioPais),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Emails aviso cambio de pais configurado...");
     }
 
     /*
@@ -2198,14 +2643,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoCargaBat")
     public ResponseEntity<String> telefAvisoCargaBat(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam String telefAvisoCargaBat) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de carga de batería";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2022, telefAvisoCargaBat);
-            return ResponseEntity.accepted().body("Teléfonos aviso carga bateria configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando  Telefonos aviso carga bateria :" + exception);
             throw new RuntimeException("Error aplicando  Teléfonos aviso carga bateria...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoCargaBat),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Teléfonos aviso carga bateria configurado...");
     }
 
     /*
@@ -2215,14 +2685,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoInicioMov")
     public ResponseEntity<String> telefAvisoInicioMov(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String telefAvisoInicioMov) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de inicio de movimiento";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2023, telefAvisoInicioMov);
-            return ResponseEntity.accepted().body("Teléfonos aviso inicio de movimiento configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración Telefonos aviso inicio de movimiento :" + exception);
             throw new RuntimeException("Error aplicando configuración Teléfonos aviso inicio de movimiento...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoInicioMov),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Teléfonos aviso inicio de movimiento configurado...");
     }
 
     /*
@@ -2232,14 +2727,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoFinMov")
     public ResponseEntity<String> telefonosAvisoFinMovimiento(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String telefAvisoFinMov) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de fin de movimiento";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2024, telefAvisoFinMov);
-            return ResponseEntity.accepted().body("Teléfonos aviso fin de movimiento configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración Teléfonos aviso fin de movimiento:" + exception);
             throw new RuntimeException("Error aplicando configuración Teléfonos aviso fin de movimiento...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoFinMov),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Teléfonos aviso fin de movimiento configurado...");
     }
 
     /*
@@ -2249,14 +2769,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoEntrGeoc")
     public ResponseEntity<String> telefAvisoEntrGeoc(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam String telefAvisoEntrGeoc) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de entrada de geocercas";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2025, telefAvisoEntrGeoc);
-            return ResponseEntity.accepted().body(" Teléfonos aviso entrada en geocerca configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración Teléfonos aviso entrada en geocerca:" + exception);
             throw new RuntimeException("Error aplicando configuración Teléfonos aviso entrada en geocerca...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoEntrGeoc),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body(" Teléfonos aviso entrada en geocerca configurado...");
     }
 
     /*
@@ -2266,14 +2811,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoSalGeoc")
     public ResponseEntity<String> telefAvisoSalGeoc(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam String telefAvisoSalGeoc) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de salida de geocercas";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2026, telefAvisoSalGeoc);
-            return ResponseEntity.accepted().body("Teléfonos aviso salida de geocerca configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración Teléfonos aviso salida de geocerca:" + exception);
             throw new RuntimeException("Error aplicando configuración Teléfonos aviso salida de geocerca...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoSalGeoc),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Teléfonos aviso salida de geocerca configurado...");
     }
 
     /*
@@ -2283,14 +2853,39 @@ public class ApiControlador {
     @PostMapping("/telefAvisoCambPais")
     public ResponseEntity<String> telefAvisoCambPais(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam String telefAvisoCambPais) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "teléfono para aviso de cambio de país";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2028, telefAvisoCambPais);
-            return ResponseEntity.accepted().body("Teléfonos aviso cambio de país configurado...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando configuración Teléfonos aviso cambio de pais:  " + exception);
             throw new RuntimeException("Error aplicando configuración: Teléfonos aviso cambio de país...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(telefAvisoCambPais),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Teléfonos aviso cambio de país configurado...");
     }
 
     /*
@@ -2308,14 +2903,37 @@ public class ApiControlador {
     @PostMapping("/nuevoEstadoAntiBarrido")
     public ResponseEntity<String> nuevoEstadoAntiBarrido(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam Integer nuevoEstadoAntiBarrido) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nuevo estado antibarrido";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
 
         try {
             establecerParametroString(idDataminer, idElement, 4219, String.valueOf(nuevoEstadoAntiBarrido));
-
         } catch (Exception exception) {
             log.error("ERROR aplicando Nuevo Estado Anti-barrido :" + exception);
             throw new RuntimeException("Error aplicando Nuevo Estado Anti-barrido...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(nuevoEstadoAntiBarrido),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2328,17 +2946,42 @@ public class ApiControlador {
     @PostMapping("/nuevaFechaIniAntiBarrido")
     public ResponseEntity<String> nuevaFechaIniAntiBarrido(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String nuevaFechaIniAntiBarrido) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nueva fecha de inicio antibarrido";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
+        String formattedTime = "";
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date d = sdf.parse(nuevaFechaIniAntiBarrido);
-            String formattedTime = output.format(d);
+            formattedTime = output.format(d);
             establecerParametroString(idDataminer, idElement, 5230, formattedTime);
-
         } catch (Exception exception) {
             log.error("Error aplicando  Nueva Fecha Inicio Anti-barrido :" + exception);
             throw new RuntimeException("Error aplicando Nueva Fecha Inicio Anti-barrido...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + formattedTime,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2351,17 +2994,43 @@ public class ApiControlador {
     @PostMapping("/nuevaFechaFinAntiBarrido")
     public ResponseEntity<String> nuevaFechaFinAntiBarrido(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String nuevaFechaFinAntiBarrido) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nueva fecha de fin antibarrido";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
+        String formattedTime = "";
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date d = sdf.parse(nuevaFechaFinAntiBarrido);
-            String formattedTime = output.format(d);
+            formattedTime = output.format(d);
             establecerParametroString(idDataminer, idElement, 5240, formattedTime);
 
         } catch (Exception exception) {
             log.error("Error aplicando Nueva Fecha Fin Anti-barrido:" + exception);
             throw new RuntimeException("Error aplicando Nueva Fecha Fin Anti-barrido...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + formattedTime,
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2374,12 +3043,37 @@ public class ApiControlador {
     @PostMapping("/aplicarConfAntiBarrido")
     public ResponseEntity<String> aplicarConfAntiBarrido(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración antibarrido";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 6009, String.valueOf(1));
         } catch (Exception exception) {
             log.error("Error al Aplicar Configuración Anti-barrido:" + exception);
             throw new RuntimeException("Error al Aplicar Configuración Anti-barrido...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(1),
+                err + " en la trazabilidad");
 
         return ResponseEntity.accepted().body("Baliza configurada...");
     }
@@ -2420,6 +3114,22 @@ public class ApiControlador {
     @PostMapping("/estadoBaliza")
     public ResponseEntity<String> estadoBaliza(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam Integer estadoBaliza) {
+
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "estado de la baliza";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicado " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
 
         System.out.println("estadoBaliza idElement, idDataminer: " + idDataminer + " " + idElement);
 
@@ -2484,12 +3194,21 @@ public class ApiControlador {
 
         try {
             establecerParametroString(idDataminer, idElement, 3016, String.valueOf(estadoBaliza));
-            return ResponseEntity.accepted().body("Baliza configurada...");
-
         } catch (Exception exception) {
             log.error("ERROR aplicando estado de la baliza en Instalacion: " + exception);
             throw new RuntimeException("Error aplicando estado de la baliza en Instalación...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(estadoBaliza),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     /*
@@ -2499,19 +3218,44 @@ public class ApiControlador {
     @PostMapping("/fechaInicInstalac")
     public ResponseEntity<String> fechaInicInstalac(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam String fechaInicInstalac) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "fecha inicio de instalación";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
         try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
 
+        String formattedTime = "";
+        try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date d = sdf.parse(fechaInicInstalac);
-            String formattedTime = output.format(d);
+            formattedTime = output.format(d);
             establecerParametroString(idDataminer, idElement, 2210, formattedTime);
-            return ResponseEntity.accepted().body("Baliza configurada...");
-
         } catch (Exception exception) {
             log.error("Error configurando Fecha inicio instalación:" + exception);
             throw new RuntimeException("Error configurando Fecha inicio instalación...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(formattedTime),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     /*
@@ -2521,19 +3265,44 @@ public class ApiControlador {
     @PostMapping("/fechaFinAutorizacion")
     public ResponseEntity<String> fechaFinAutorizacion(@RequestParam Integer idDataminer,
             @RequestParam Integer idElement, @RequestParam String fechaFinAutorizacion) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "fecha fin de instalación";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
         try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
 
+        String formattedTime = "";
+        try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date d = sdf.parse(fechaFinAutorizacion);
-            String formattedTime = output.format(d);
+            formattedTime = output.format(d);
             establecerParametroString(idDataminer, idElement, 2211, formattedTime);
-            return ResponseEntity.accepted().body("Baliza configurada...");
-
         } catch (Exception exception) {
             log.error("Error configurando Fecha fin de autorización: " + exception);
             throw new RuntimeException("Error configurando fecha fin autorización...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(formattedTime),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     /*
@@ -2560,14 +3329,39 @@ public class ApiControlador {
     @PostMapping("/cargaBatInst")
     public ResponseEntity<String> cargaBatInst(@RequestParam Integer idDataminer, @RequestParam Integer idElement,
             @RequestParam Integer cargaBatInst) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "configuración de carga de batería";
+        String err = "Fallo aplicando " + generico;
+        String sat = "Fue aplicada la " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando aplicar " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar aplicar {}", generico, e);
+            throw new RuntimeException(
+                    "Fallo validando autorización, al intentar aplicar la " + generico + e.getMessage());
+        }
+
         try {
             establecerParametroString(idDataminer, idElement, 2018, String.valueOf(cargaBatInst));
-            return ResponseEntity.accepted().body("Baliza configurada...");
-
         } catch (Exception exception) {
             log.error("Error configurando Carga Batería Instalada:" + exception);
             throw new RuntimeException("Error configurando Carga Batería Instalada...");
         }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                3,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(cargaBatInst),
+                err + " en la trazabilidad");
+
+        return ResponseEntity.accepted().body("Baliza configurada...");
     }
 
     /*
