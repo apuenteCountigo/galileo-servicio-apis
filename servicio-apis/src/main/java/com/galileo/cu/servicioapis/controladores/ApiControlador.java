@@ -11,6 +11,7 @@ import com.galileo.cu.servicioapis.servicios.ConexionService;
 import com.galileo.cu.servicioapis.servicios.TrazabilidadService;
 import com.galileo.cu.servicioapis.servicios.ValidateAuthorization;
 import com.galileo.cu.servicioapis.utils.Utils;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.SerializationUtils;
@@ -47,6 +48,7 @@ public class ApiControlador {
     private final OperacionRepository operacionRepository;
     private final ObjetivoRepository objetivoRepository;
     private String ID_CONNECTION_DATAMINER = null;
+    private URI URI_CONNECTION_DATAMINER = null;
     private final ConexionService conexionService;
 
     public ApiControlador(ApisServicio apisServicio, OperacionRepository operacionRepository,
@@ -3836,18 +3838,18 @@ public class ApiControlador {
 
     // Obtener uri dataminer
     private URI obtenerUriDataMiner() {
-        Conexiones conexion = encontrarConexion("DATAMINER");
-        URI uri;
+        // Conexiones conexion = encontrarConexion("DATAMINER");
+        // URI uri;
 
-        try {
-            String uriBuild = "http://" + conexion.getIpServicio() + "";
-            uri = new URI(uriBuild);
-        } catch (URISyntaxException e) {
-            log.error("Error obteniendo la URI de DataMiner: " + e.getMessage());
-            throw new RuntimeException("Error Error obteniendo la URI de DataMiner...");
-        }
+        // try {
+        // String uriBuild = "http://" + conexion.getIpServicio() + "";
+        // uri = new URI(uriBuild);
+        // } catch (URISyntaxException e) {
+        // log.error("Error obteniendo la URI de DataMiner: " + e.getMessage());
+        // throw new RuntimeException("Error Error obteniendo la URI de DataMiner...");
+        // }
 
-        return uri;
+        return URI_CONNECTION_DATAMINER;
     }
 
     // Obtener el ID para conectar a dataminer
@@ -3856,18 +3858,28 @@ public class ApiControlador {
         URI uri;
         ConnectAppDataMiner connectAppDataMiner;
 
+        String err = "Fallo intentando acceder al servidor DMA, " + conexion.getIpServicio();
         try {
             String uriBuild = "http://" + conexion.getIpServicio();
             connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(), conexion.getPassword(), "v1",
                     null, null);
             uri = new URI(uriBuild);
-        } catch (URISyntaxException e) {
-            log.error("Error accediendo a servidor de DataMiner: " + e.getMessage());
-            throw new RuntimeException(
-                    "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión...");
-        }
+            String tokenDMA = apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
 
-        return apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
+            if (Strings.isNullOrEmpty(tokenDMA)) {
+                log.error(err);
+                throw new RuntimeException(err);
+            }
+
+            URI_CONNECTION_DATAMINER = uri;
+            return tokenDMA;
+        } catch (URISyntaxException e) {
+            if (!e.getMessage().contains("Fallo")) {
+                err = "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión... ";
+            }
+            log.error(err + e.getMessage());
+            throw new RuntimeException(err);
+        }
     }
 
     private Conexiones encontrarConexion(String nombre_conexion) {
