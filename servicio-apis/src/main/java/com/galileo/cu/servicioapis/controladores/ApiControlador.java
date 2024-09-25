@@ -2121,6 +2121,37 @@ public class ApiControlador {
     @PostMapping("/nuevaConfiguracionGPSLive")
     public ResponseEntity<?> obtenerNuevaConfiguracionGPSLive(@RequestParam("idDataminer") Integer idDataminer,
             @RequestParam("idElement") Integer idElement, @RequestParam Integer valorNuevaConfigGpsLive) {
+        ValidateAuthorization val = new ValidateAuthorization();
+        String generico = "nueva configuración GPSLive";
+        String err = "Fallo creando " + generico;
+        String sat = "Fue creada una " + generico;
+        try {
+            if (!val.Validate(req, objectMapper)) {
+                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+                throw new RuntimeException(
+                        "Fallo el Usuario Enviado no Coincide con el Autenticado, intentando crear " + generico);
+            }
+        } catch (Exception e) {
+            log.error("Fallo validando autorización, al intentar crear {}", generico, e);
+            throw new RuntimeException("Fallo validando autorización, al intentar crear " + generico + e.getMessage());
+        }
+
+        try {
+            establecerParametroString(idDataminer, idElement, 4717, String.valueOf(valorNuevaConfigGpsLive));
+        } catch (Exception exception) {
+            log.error("ERROR al Aplicar nueva configuración GPSLive :" + exception);
+            throw new RuntimeException("Error al aplicar nueva configuración gpslive...");
+        }
+
+        traza.ActualizarTraza(
+                val,
+                0,
+                7,
+                1,
+                sat + " correctamente con los siguintes valores: idDataminer: " + idDataminer + ", idElement: "
+                        + idElement + ", Valor: " + String.valueOf(valorNuevaConfigGpsLive),
+                err + " en la trazabilidad");
+
         try {
             return obtenerParametroBaliza(idDataminer, idElement, 4717);
         } catch (Exception exception) {
