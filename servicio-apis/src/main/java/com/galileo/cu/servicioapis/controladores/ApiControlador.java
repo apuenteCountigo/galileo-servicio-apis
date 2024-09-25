@@ -56,7 +56,7 @@ public class ApiControlador {
     public ApiControlador(ApisServicio apisServicio, OperacionRepository operacionRepository,
             ObjetivoRepository objetivoRepository, ConexionService conexionService,
             BalizaRepository balizaRepository, HttpServletRequest req, ObjectMapper objectMapper,
-            TrazabilidadService traza) {
+            TrazabilidadService traza, ConexionRepository conRepo) {
         this.apisServicio = apisServicio;
         this.operacionRepository = operacionRepository;
         this.objetivoRepository = objetivoRepository;
@@ -65,6 +65,7 @@ public class ApiControlador {
         this.objectMapper = objectMapper;
         this.req = req;
         this.traza = traza;
+        this.conRepository = conRepo;
     }
 
     // ************************************************************************************//
