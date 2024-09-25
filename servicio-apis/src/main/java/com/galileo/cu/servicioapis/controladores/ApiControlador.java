@@ -51,6 +51,7 @@ public class ApiControlador {
     private final ObjetivoRepository objetivoRepository;
     private String ID_CONNECTION_DATAMINER = null;
     private URI URI_CONNECTION_DATAMINER = null;
+    private Conexiones CURRENT_CONNECTION_DATAMINER = null;
     private final ConexionService conexionService;
 
     public ApiControlador(ApisServicio apisServicio, OperacionRepository operacionRepository,
@@ -72,25 +73,6 @@ public class ApiControlador {
     // ***************************OPERACIONES EN
     // TRACCAR***********************************//
     // ************************************************************************************//
-
-    @GetMapping("/testTraza")
-    public ResponseEntity<String> testTraza() {
-        ValidateAuthorization val = new ValidateAuthorization();
-        try {
-            log.info("*****CONTROLADOR testTraza*****");
-            if (!val.Validate(req, objectMapper)) {
-                log.error("Fallo el Usuario Enviado no Coincide con el Autenticado ");
-                throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado ");
-            }
-        } catch (Exception e) {
-            log.error("Fallo Antes de Crear el Elemento Validando Autorización: ", e.getMessage());
-            throw new RuntimeException("Fallo Antes de Crear el Elemento Validando Autorización: " + e.getMessage());
-        }
-
-        traza.ActualizarTraza(val, 0, 7, 1, "Fue Asignada una alarma nueva", "Fallo asignando nueva alarma");
-
-        return ResponseEntity.ok().body("OK");
-    }
 
     /**
      * description: enviar url mapa embebido de traccar
@@ -3892,6 +3874,21 @@ public class ApiControlador {
 
     private String obtenerIDConnect() {
         List<Conexiones> listCon = ConexionesByServicio("DATAMINER");
+
+        // Verificar si CURRENT_CONNECTION_DATAMINER no es null y está en la lista
+        if (CURRENT_CONNECTION_DATAMINER != null && listCon.contains(CURRENT_CONNECTION_DATAMINER)) {
+            // Intentar conexión con CURRENT_CONNECTION_DATAMINER
+            String tokenDMA = intentarConexion(CURRENT_CONNECTION_DATAMINER);
+            if (!Strings.isNullOrEmpty(tokenDMA)) {
+                // Conexión exitosa
+                return tokenDMA;
+            } else {
+                // Remover la conexión fallida de la lista para evitar reintentos
+                listCon.remove(CURRENT_CONNECTION_DATAMINER);
+            }
+        }
+
+        // Iniciar recursividad con el resto de las conexiones
         return obtenerIDConnectRecursivo(listCon, 0);
     }
 
@@ -3903,9 +3900,20 @@ public class ApiControlador {
         }
 
         Conexiones conexion = listCon.get(indice);
+        String tokenDMA = intentarConexion(conexion);
+
+        if (!Strings.isNullOrEmpty(tokenDMA)) {
+            // Conexión exitosa
+            return tokenDMA;
+        } else {
+            // Intentar con la siguiente conexión
+            return obtenerIDConnectRecursivo(listCon, indice + 1);
+        }
+    }
+
+    private String intentarConexion(Conexiones conexion) {
         URI uri;
         ConnectAppDataMiner connectAppDataMiner;
-
         String err = "Fallo intentando acceder al servidor DMA, " + conexion.getIpServicio();
         try {
             String uriBuild = "http://" + conexion.getIpServicio();
@@ -3916,19 +3924,18 @@ public class ApiControlador {
 
             if (Strings.isNullOrEmpty(tokenDMA)) {
                 log.error(err);
-                // Intentar con la siguiente conexión
-                return obtenerIDConnectRecursivo(listCon, indice + 1);
+                return null;
             }
 
             URI_CONNECTION_DATAMINER = uri;
+            CURRENT_CONNECTION_DATAMINER = conexion; // Actualizar la conexión actual
             return tokenDMA;
         } catch (Exception e) {
             if (!e.getMessage().contains("Fallo")) {
                 err = "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión... ";
             }
             log.error(err + e.getMessage());
-            // Intentar con la siguiente conexión
-            return obtenerIDConnectRecursivo(listCon, indice + 1);
+            return null;
         }
     }
 
