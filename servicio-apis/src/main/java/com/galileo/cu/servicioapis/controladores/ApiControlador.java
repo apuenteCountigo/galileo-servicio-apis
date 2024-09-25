@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galileo.cu.commons.models.*;
 import com.galileo.cu.servicioapis.entidades.*;
 import com.galileo.cu.servicioapis.repositorios.BalizaRepository;
+import com.galileo.cu.servicioapis.repositorios.ConexionRepository;
 import com.galileo.cu.servicioapis.repositorios.ObjetivoRepository;
 import com.galileo.cu.servicioapis.repositorios.OperacionRepository;
 import com.galileo.cu.servicioapis.servicios.ApisServicio;
@@ -43,6 +44,7 @@ public class ApiControlador {
     private final TrazabilidadService traza;
 
     private final BalizaRepository balizaRepository;
+    private final ConexionRepository conRepository;
 
     private final ApisServicio apisServicio;
     private final OperacionRepository operacionRepository;
@@ -3853,8 +3855,53 @@ public class ApiControlador {
     }
 
     // Obtener el ID para conectar a dataminer
+    // private String obtenerIDConnect() {
+    // List<Conexiones> listCon = ConexionesByServicio("DATAMINER");
+    // Conexiones conexion = encontrarConexion("DATAMINER");
+    // URI uri;
+    // ConnectAppDataMiner connectAppDataMiner;
+
+    // String err = "Fallo intentando acceder al servidor DMA, " +
+    // conexion.getIpServicio();
+    // try {
+    // String uriBuild = "http://" + conexion.getIpServicio();
+    // connectAppDataMiner = new ConnectAppDataMiner(null, conexion.getUsuario(),
+    // conexion.getPassword(), "v1",
+    // null, null);
+    // uri = new URI(uriBuild);
+    // String tokenDMA = apisServicio.obtenerIdConnectDataMinerServ(uri,
+    // connectAppDataMiner).getD();
+
+    // if (Strings.isNullOrEmpty(tokenDMA)) {
+    // log.error(err);
+    // throw new RuntimeException(err);
+    // }
+
+    // URI_CONNECTION_DATAMINER = uri;
+    // return tokenDMA;
+    // } catch (URISyntaxException e) {
+    // if (!e.getMessage().contains("Fallo")) {
+    // err = "Error accediendo a servidor de DataMiner, verifique la configuración
+    // de la conexión... ";
+    // }
+    // log.error(err + e.getMessage());
+    // throw new RuntimeException(err);
+    // }
+    // }
+
     private String obtenerIDConnect() {
-        Conexiones conexion = encontrarConexion("DATAMINER");
+        List<Conexiones> listCon = ConexionesByServicio("DATAMINER");
+        return obtenerIDConnectRecursivo(listCon, 0);
+    }
+
+    private String obtenerIDConnectRecursivo(List<Conexiones> listCon, int indice) {
+        if (indice >= listCon.size()) {
+            String err = "No se pudo establecer conexión con ningún servidor DataMiner.";
+            log.error(err);
+            throw new RuntimeException(err);
+        }
+
+        Conexiones conexion = listCon.get(indice);
         URI uri;
         ConnectAppDataMiner connectAppDataMiner;
 
@@ -3868,16 +3915,28 @@ public class ApiControlador {
 
             if (Strings.isNullOrEmpty(tokenDMA)) {
                 log.error(err);
-                throw new RuntimeException(err);
+                // Intentar con la siguiente conexión
+                return obtenerIDConnectRecursivo(listCon, indice + 1);
             }
 
             URI_CONNECTION_DATAMINER = uri;
             return tokenDMA;
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             if (!e.getMessage().contains("Fallo")) {
                 err = "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión... ";
             }
             log.error(err + e.getMessage());
+            // Intentar con la siguiente conexión
+            return obtenerIDConnectRecursivo(listCon, indice + 1);
+        }
+    }
+
+    private List<Conexiones> ConexionesByServicio(String DMA) {
+        try {
+            return conRepository.findByServicio(DMA);
+        } catch (Exception e) {
+            String err = "";
+            log.error(err, e.getMessage());
             throw new RuntimeException(err);
         }
     }
