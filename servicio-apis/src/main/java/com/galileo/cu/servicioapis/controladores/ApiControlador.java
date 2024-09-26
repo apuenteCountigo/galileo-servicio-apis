@@ -3894,6 +3894,8 @@ public class ApiControlador {
 
     private String obtenerIDConnectRecursivo(List<Conexiones> listCon, int indice) {
         if (indice >= listCon.size()) {
+            CURRENT_CONNECTION_DATAMINER = null;
+            URI_CONNECTION_DATAMINER = null;
             String err = "No se pudo establecer conexión con ningún servidor DataMiner.";
             log.error(err);
             throw new RuntimeException(err);
