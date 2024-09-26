@@ -3546,18 +3546,16 @@ public class ApiControlador {
 
     private ResponseEntity<?> getGeocercas(Integer elementId, Integer dataminerId, Integer parametro) {
         try {
-            Conexiones conexion = conexionService.getConexionDataminer();
-            String uriBuild = conexion.buildHttpUriDataminer();
-            URI uri = new URI(uriBuild);
-            String conexionToken = apisServicio
-                    .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1", conexion)).getD();
+            // Conexiones conexion = conexionService.getConexionDataminer();
+            // String uriBuild = conexion.buildHttpUriDataminer();
+            // URI uri = new URI(uriBuild);
+            // String conexionToken = apisServicio
+            // .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1",
+            // conexion)).getD();
 
             return ResponseEntity
-                    .ok(apisServicio.getGeocerca(uri, conexionToken, dataminerId, elementId, parametro).getBody());
-        } catch (URISyntaxException e) {
-            log.error("Uri no valida", e);
-            throw new RuntimeException(
-                    "ERROR ACCEDIENDO A SERVIDOR DE DATAMINER, verifique la configuración de la conexión");
+                    .ok(apisServicio.getGeocerca(URI_CONNECTION_DATAMINER, ID_CONNECTION_DATAMINER, dataminerId,
+                            elementId, parametro).getBody());
         } catch (Exception exception) {
             log.error("ERROR OBTENIENDO configuración AVANZADA DE BALIZA", exception);
             throw new RuntimeException("ERROR OBTENIENDO CONFIGURACIóN AVANZADA DE BALIZA, LA BALIZA NO EXISTE...  ");
@@ -3567,20 +3565,18 @@ public class ApiControlador {
     @PostMapping("/dataminer/parameter")
     public ResponseEntity<?> setDataminerParameter(@RequestBody SetParameter parameter) {
         try {
-            Conexiones conexion = conexionService.getConexionDataminer();
-            String uriBuild = conexion.buildHttpUriDataminer();
-            URI uri = new URI(uriBuild);
-            String conexionToken = apisServicio
-                    .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1", conexion)).getD();
+            // Conexiones conexion = conexionService.getConexionDataminer();
+            // String uriBuild = conexion.buildHttpUriDataminer();
+            // URI uri = new URI(uriBuild);
+            // String conexionToken = apisServicio
+            // .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1",
+            // conexion)).getD();
 
             SetParameter param = (SetParameter) SerializationUtils.clone(parameter);
-            param.setConnection(conexionToken);
+            param.setConnection(ID_CONNECTION_DATAMINER);
 
-            return ResponseEntity.ok(new ResposeString(apisServicio.setParameterDataMinerServ(uri, param).getBody()));
-        } catch (URISyntaxException e) {
-            log.error("Uri no valida", e);
-            throw new RuntimeException(
-                    "ERROR ACCEDIENDO A SERVIDOR DE DATAMINER, verifique la configuración de la conexión");
+            return ResponseEntity.ok(new ResposeString(
+                    apisServicio.setParameterDataMinerServ(URI_CONNECTION_DATAMINER, param).getBody()));
         } catch (Exception exception) {
             log.error("ERROR OBTENIENDO configuración AVANZADA DE BALIZA", exception);
             throw new RuntimeException("ERROR OBTENIENDO CONFIGURACIóN AVANZADA DE BALIZA, LA BALIZA NO EXISTE...  ");
@@ -3590,20 +3586,17 @@ public class ApiControlador {
     @PostMapping("/dataminer/getparameter")
     public ResponseEntity<?> getDataminerParameter(@RequestBody SetParameter parameter) {
         try {
-            Conexiones conexion = conexionService.getConexionDataminer();
-            String uriBuild = conexion.buildHttpUriDataminer();
-            URI uri = new URI(uriBuild);
-            String conexionToken = apisServicio
-                    .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1", conexion)).getD();
+            // Conexiones conexion = conexionService.getConexionDataminer();
+            // String uriBuild = conexion.buildHttpUriDataminer();
+            // URI uri = new URI(uriBuild);
+            // String conexionToken = apisServicio
+            // .obtenerIdConnectDataMinerServ(uri, Utils.buildConnectAppDataMiner("v1",
+            // conexion)).getD();
 
             SetParameter param = (SetParameter) SerializationUtils.clone(parameter);
-            param.setConnection(conexionToken);
+            param.setConnection(ID_CONNECTION_DATAMINER);
 
-            return ResponseEntity.ok(apisServicio.obtenerParametroBaliza(uri, param).getBody());
-        } catch (URISyntaxException e) {
-            log.error("Uri no valida", e);
-            throw new RuntimeException(
-                    "ERROR ACCEDIENDO A SERVIDOR DE DATAMINER, verifique la configuración de la conexión");
+            return ResponseEntity.ok(apisServicio.obtenerParametroBaliza(URI_CONNECTION_DATAMINER, param).getBody());
         } catch (Exception exception) {
             log.error("ERROR OBTENIENDO configuración AVANZADA DE BALIZA", exception);
             throw new RuntimeException("ERROR OBTENIENDO CONFIGURACIóN AVANZADA DE BALIZA, LA BALIZA NO EXISTE...  ");
