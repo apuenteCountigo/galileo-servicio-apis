@@ -3875,21 +3875,23 @@ public class ApiControlador {
     private String obtenerIDConnect() {
         List<Conexiones> listCon = ConexionesByServicio("DATAMINER");
 
-        if (CURRENT_CONNECTION_DATAMINER != null)
-            log.info("CURRENT_CONNECTION_DATAMINER=" + CURRENT_CONNECTION_DATAMINER.getIpServicio());
         // Verificar si CURRENT_CONNECTION_DATAMINER no es null y está en la lista
-        if (CURRENT_CONNECTION_DATAMINER != null && listCon.contains(CURRENT_CONNECTION_DATAMINER)) {
-            // Intentar conexión con CURRENT_CONNECTION_DATAMINER
-            log.info("INTENTANDO CONEXION CURRENT_CONNECTION_DATAMINER: "
-                    + CURRENT_CONNECTION_DATAMINER.getIpServicio());
-            String tokenDMA = intentarConexion(CURRENT_CONNECTION_DATAMINER);
-            if (!Strings.isNullOrEmpty(tokenDMA)) {
-                // Conexión exitosa
-                log.info("Conexión exitosa con: " + CURRENT_CONNECTION_DATAMINER.getIpServicio());
-                return tokenDMA;
-            } else {
-                // Remover la conexión fallida de la lista para evitar reintentos
-                listCon.remove(CURRENT_CONNECTION_DATAMINER);
+        // basándose en el ID
+        if (CURRENT_CONNECTION_DATAMINER != null) {
+            Optional<Conexiones> conexionActual = listCon.stream()
+                    .filter(conexion -> conexion.getId() == CURRENT_CONNECTION_DATAMINER.getId())
+                    .findFirst();
+
+            if (conexionActual.isPresent()) {
+                // Intentar conexión con CURRENT_CONNECTION_DATAMINER
+                String tokenDMA = intentarConexion(CURRENT_CONNECTION_DATAMINER);
+                if (!Strings.isNullOrEmpty(tokenDMA)) {
+                    // Conexión exitosa
+                    return tokenDMA;
+                } else {
+                    // Remover la conexión fallida de la lista para evitar reintentos
+                    listCon.remove(conexionActual.get());
+                }
             }
         }
 
