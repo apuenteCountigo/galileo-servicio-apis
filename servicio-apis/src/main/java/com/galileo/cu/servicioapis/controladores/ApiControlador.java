@@ -3929,8 +3929,10 @@ public class ApiControlador {
 
             URI_CONNECTION_DATAMINER = uri;
             CURRENT_CONNECTION_DATAMINER = conexion; // Actualizar la conexión actual
+            log.info("Conexión exitosa a: " + CURRENT_CONNECTION_DATAMINER.getIpServicio());
             return tokenDMA;
         } catch (Exception e) {
+            log.error("Conexión fallida a: " + conexion.getIpServicio());
             if (!e.getMessage().contains("Fallo")) {
                 err = "Error accediendo a servidor de DataMiner, verifique la configuración de la conexión... ";
             }
