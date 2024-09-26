@@ -3875,6 +3875,7 @@ public class ApiControlador {
     private String obtenerIDConnect() {
         List<Conexiones> listCon = ConexionesByServicio("DATAMINER");
 
+        log.info("CURRENT_CONNECTION_DATAMINER=" + CURRENT_CONNECTION_DATAMINER.getIpServicio());
         // Verificar si CURRENT_CONNECTION_DATAMINER no es null y está en la lista
         if (CURRENT_CONNECTION_DATAMINER != null && listCon.contains(CURRENT_CONNECTION_DATAMINER)) {
             // Intentar conexión con CURRENT_CONNECTION_DATAMINER
