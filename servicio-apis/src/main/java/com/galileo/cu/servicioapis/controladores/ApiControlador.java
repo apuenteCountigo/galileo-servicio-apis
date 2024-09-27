@@ -8,6 +8,7 @@ import com.galileo.cu.servicioapis.repositorios.OperacionRepository;
 import com.galileo.cu.servicioapis.servicios.ApisServicio;
 import com.galileo.cu.servicioapis.servicios.ConexionService;
 import com.galileo.cu.servicioapis.utils.Utils;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.SerializationUtils;
@@ -58,127 +59,144 @@ public class ApiControlador {
 
     /**
      * description: enviar url mapa embebido de traccar
+     * 
      * @return url de mapa embebido de traccar
      */
     @GetMapping("/mostrarMapaTraccar")
-    public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser){
+    public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
 
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
+                    obtenerAutorizacionTraccar());
             System.out.println(stringResponseEntity.getBody());
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("No existe conexion con el servidor TRACCAR, verificar la configuracion: {}", e.getMessage());
-            if (e.getMessage().contains("Connection refused")){
-                new RuntimeException("No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR ");
+            if (e.getMessage().contains("Connection refused")) {
+                new RuntimeException(
+                        "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR ");
             }
         }
 
         URL url = null;
 
-        DecodificarToken decodificarToken =  apisServicio.decodiTokenServ(tokenUser);
+        DecodificarToken decodificarToken = apisServicio.decodiTokenServ(tokenUser);
 
         Usuarios usuario = new Usuarios();
         try {
             usuario = apisServicio.findUsuarioByIdServ(decodificarToken.getId()).get();
-        }catch (Exception exception){
+        } catch (Exception exception) {
             log.error("Error consultando usuarios para mostrar mapa...{}", exception.getMessage());
         }
 
-
         try {
-            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar() );
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(),
+                    Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar());
 
             if (usuarioTraccar != null) {
                 try {
-                    if ((usuario.getTraccarID() != null) && usuario.getPerfil().getDescripcion().equals("Super Administrador")){
+                    if ((usuario.getTraccarID() != null)
+                            && usuario.getPerfil().getDescripcion().equals("Super Administrador")) {
                         try {
-                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
-                            objetivoTraccarList.forEach(objetivoTraccar -> usuarioAgregarPermisoOjetivo(decodificarToken.getTraccarID() , objetivoTraccar.getId()));
-                        }catch (Exception e){
-                            log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."+e.getMessage());
+                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio
+                                    .objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+                            objetivoTraccarList.forEach(objetivoTraccar -> usuarioAgregarPermisoOjetivo(
+                                    decodificarToken.getTraccarID(), objetivoTraccar.getId()));
+                        } catch (Exception e) {
+                            log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."
+                                    + e.getMessage());
                         }
                     }
 
-                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null) && usuario.getPerfil().getDescripcion().equals("Administrador de Unidad")) {
+                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null)
+                            && usuario.getPerfil().getDescripcion().equals("Administrador de Unidad")) {
                         try {
                             cambioPerfilSAoUFtoAU(usuario);
-                        }catch (Exception e){
-                            log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."+e.getMessage());
+                        } catch (Exception e) {
+                            log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."
+                                    + e.getMessage());
                         }
                     }
 
-                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null) && usuario.getPerfil().getDescripcion().equals("Usuario Final")) {
+                    if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null)
+                            && usuario.getPerfil().getDescripcion().equals("Usuario Final")) {
                         try {
-                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+                            List<ObjetivoTraccar> objetivoTraccarList = apisServicio
+                                    .objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
 
-                            if (objetivoTraccarList != null){
+                            if (objetivoTraccarList != null) {
                                 Usuarios finalUsuario = usuario;
                                 objetivoTraccarList.forEach(objetivoTraccar -> {
-                                    usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()), objetivoTraccar.getId());
+                                    usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()),
+                                            objetivoTraccar.getId());
                                 });
                             }
 
-                        }catch (Exception e){
-                            log.error("Error eliminando permisos a usuario final sobre dispositivos..."+e.getMessage());
+                        } catch (Exception e) {
+                            log.error(
+                                    "Error eliminando permisos a usuario final sobre dispositivos..." + e.getMessage());
                         }
                     }
 
                     try {
-                        if (ID_CONNECTION_DATAMINER == null){
+                        if (ID_CONNECTION_DATAMINER == null) {
                             obtenerIDConnectFinal();
                         }
-                    }catch (Exception exception){
+                    } catch (Exception exception) {
                         log.error(exception.getMessage());
                     }
-                }catch (Exception exception){
+                } catch (Exception exception) {
                     log.error("Error aplicando permisos de usuario en TRACCAR: {}", exception.getMessage());
                 }
             }
-        }catch (Exception exception){
-            if (exception.getMessage().contains("404 - Not Found")){
+        } catch (Exception exception) {
+            if (exception.getMessage().contains("404 - Not Found")) {
                 log.error("No existe el usuario: {} en TRACCAR", usuario.getTip());
-            } else log.error(exception.getMessage());
+            } else
+                log.error(exception.getMessage());
         }
 
         try {
 
-            String urlBuild = obtenerUriTraccar()+"/?token="+decodificarToken.getTraccar();
+            String urlBuild = obtenerUriTraccar() + "/?token=" + decodificarToken.getTraccar();
             url = new URL(urlBuild);
             return ResponseEntity.status(HttpStatus.OK).body(url);
         } catch (MalformedURLException e) {
-            log.error("ERROR ACCEDIENDO A TRACCAR: "+e);
+            log.error("ERROR ACCEDIENDO A TRACCAR: " + e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(url);
         }
     }
 
     @PostMapping("/establecerPermisosInicialesUsuarioNuevoTraccar")
-    public void establecerPermisosInicialesUsuarioNuevo(@RequestBody Usuarios usuario){
+    public void establecerPermisosInicialesUsuarioNuevo(@RequestBody Usuarios usuario) {
 
-//        1  Super Administrador
-//        2  Administrador de Unidad
-//        3  Usuario Final
-//        4  Invitado Externo
+        // 1 Super Administrador
+        // 2 Administrador de Unidad
+        // 3 Usuario Final
+        // 4 Invitado Externo
 
-        log.info("Aplicando permisos de usuario nuevo en traccar, usuario: "+usuario.getTip());
-
+        log.info("Aplicando permisos de usuario nuevo en traccar, usuario: " + usuario.getTip());
 
         try {
-            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar() );
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(),
+                    Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar());
 
             if (usuarioTraccar != null) {
-                if ((usuario.getTraccarID() != null) && (usuario.getPerfil().getId() == 1)){
+                if ((usuario.getTraccarID() != null) && (usuario.getPerfil().getId() == 1)) {
                     try {
-                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio
+                                .objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
 
-                        log.info("Cantidad de objetivos en traccar: "+objetivoTraccarList.size());
+                        log.info("Cantidad de objetivos en traccar: " + objetivoTraccarList.size());
 
                         // Crear una lista para almacenar los CompletableFuture
                         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
                         for (ObjetivoTraccar objetivoTraccar : objetivoTraccarList) {
-                            // Crear un CompletableFuture para cada llamada al método usuarioAgregarPermisoOjetivo
+                            // Crear un CompletableFuture para cada llamada al método
+                            // usuarioAgregarPermisoOjetivo
                             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                                usuarioAgregarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()), objetivoTraccar.getId());
+                                usuarioAgregarPermisoOjetivo(Math.toIntExact(usuario.getTraccarID()),
+                                        objetivoTraccar.getId());
                             });
 
                             // Añadir el CompletableFuture a la lista
@@ -188,42 +206,51 @@ public class ApiControlador {
                         // Esperar a que todos los CompletableFuture se completen
                         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-                    }catch (Exception e){
-                        log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."+e.getMessage());
-                        throw new RuntimeException("Error aplicando permisos a Super Administrador sobre dispositivos...");
+                    } catch (Exception e) {
+                        log.error("Error aplicando permisos a Super Administrador sobre dispositivos..."
+                                + e.getMessage());
+                        throw new RuntimeException(
+                                "Error aplicando permisos a Super Administrador sobre dispositivos...");
                     }
                 }
 
-                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null) && (usuario.getPerfil().getId() == 2)) {
+                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() != null)
+                        && (usuario.getPerfil().getId() == 2)) {
                     try {
                         cambioPerfilSAoUFtoAU(usuario);
-                    }catch (Exception e){
-                        log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."+e.getMessage());
-                        throw new RuntimeException("Error aplicando permisos a Administrador de Unidad sobre dispositivos...");
+                    } catch (Exception e) {
+                        log.error("Error aplicando permisos a Administrador de Unidad sobre dispositivos..."
+                                + e.getMessage());
+                        throw new RuntimeException(
+                                "Error aplicando permisos a Administrador de Unidad sobre dispositivos...");
                     }
                 }
 
-                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null) && (usuario.getPerfil().getId() == 3)) {
+                if ((usuario.getTraccarID() != null) && (usuario.getUnidad() == null)
+                        && (usuario.getPerfil().getId() == 3)) {
                     try {
-                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio.objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
+                        List<ObjetivoTraccar> objetivoTraccarList = apisServicio
+                                .objetivoTraccarListServ(obtenerUriTraccar(), obtenerAutorizacionTraccar());
 
-                        if (objetivoTraccarList != null){
+                        if (objetivoTraccarList != null) {
                             Usuarios finalUsuario = usuario;
                             objetivoTraccarList.forEach(objetivoTraccar -> {
-                                usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()), objetivoTraccar.getId());
+                                usuarioEliminarPermisoOjetivo(Math.toIntExact(finalUsuario.getTraccarID()),
+                                        objetivoTraccar.getId());
                             });
                         }
 
-                    }catch (Exception e){
-                        log.error("Error eliminando permisos a usuario final sobre dispositivos..."+e.getMessage());
+                    } catch (Exception e) {
+                        log.error("Error eliminando permisos a usuario final sobre dispositivos..." + e.getMessage());
                         throw new RuntimeException("Error eliminando permisos a usuario final sobre dispositivos...");
                     }
                 }
             }
-        } catch (Exception exception){
-            if (exception.getMessage().contains("404 - Not Found")){
+        } catch (Exception exception) {
+            if (exception.getMessage().contains("404 - Not Found")) {
                 log.error("No existe el usuario: {} en TRACCAR", usuario.getTip());
-            } else log.error(exception.getMessage());
+            } else
+                log.error(exception.getMessage());
         }
     }
 
@@ -486,7 +513,8 @@ public class ApiControlador {
             @RequestParam("operacioniDGrupo") Integer operacioniDGrupo) {
 
         try {
-            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(), usuarioTraccarId, obtenerAutorizacionTraccar() );
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(),
+                    usuarioTraccarId, obtenerAutorizacionTraccar());
 
             if (usuarioTraccar != null) {
                 try {
@@ -501,14 +529,15 @@ public class ApiControlador {
                     throw new RuntimeException("Error otorgando permiso a usuario en TRACCAR...");
                 }
             }
-        }catch (Exception exception){
-            if (exception.getMessage().contains("404 - Not Found")){
+        } catch (Exception exception) {
+            if (exception.getMessage().contains("404 - Not Found")) {
                 log.error("No existe el usuario con traccarID: {} en TRACCAR", usuarioTraccarId);
-            } else log.error(exception.getMessage());
+            } else
+                log.error(exception.getMessage());
 
             return ResponseEntity.badRequest().body("Permisos otorgados correctamente");
         }
-       return null;
+        return null;
     }
 
     @DeleteMapping("/usuarioPermisoOperacion")
@@ -576,11 +605,12 @@ public class ApiControlador {
 
     /**
      * descripcion: SALVAR ELEMENTO(BALIZA) EN DATAMINER
+     * 
      * @param baliza, @descripcion: baliza a salvar en dataminer
      * @return ResponseEntity
      */
     @PostMapping("/salvarbalizaDataMiner")
-    public  ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
+    public ResponseEntity<Balizas> salvarbalizaDataMiner(@RequestBody Balizas baliza) {
 
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
@@ -592,51 +622,55 @@ public class ApiControlador {
                 totalLicencia.set(d.getAmountElementsMaximum());
             });
 
-            if (totalLicencia.get() == elementosCreados.get()){
-                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
+            if (totalLicencia.get() == elementosCreados.get()) {
+                throw new RuntimeException(
+                        "Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
             }
 
-        }catch (Exception exception){
+        } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
-
 
         URI uri;
         Conexiones conexiones = baliza.getServidor();
         Conexiones conexionTraccar = encontrarConexion("TRACCAR");
         ConnectAppDataMiner connectAppDataMiner;
 
-        //HALLAR LA URI
-        String uriBuild = "http://"+ conexiones.getIpServicio();
-        connectAppDataMiner = new ConnectAppDataMiner(null, conexiones.getUsuario(), conexiones.getPassword(), "v1", null, null);
+        // HALLAR LA URI
+        String uriBuild = "http://" + conexiones.getIpServicio();
+        connectAppDataMiner = new ConnectAppDataMiner(null, conexiones.getUsuario(), conexiones.getPassword(), "v1",
+                null, null);
         try {
             uri = new URI(uriBuild);
         } catch (URISyntaxException e) {
-            log.error("Error en la URL de DataMiner, verifique la configuración de la conexión..."+e);
+            log.error("Error en la URL de DataMiner, verifique la configuración de la conexión..." + e);
             throw new RuntimeException("Error en la URL de DataMiner, verifique la configuración de la conexión");
         }
 
-        //OBTENER IDCONNECT DE DATAMINER
+        // OBTENER IDCONNECT DE DATAMINER
         String idConnect = apisServicio.obtenerIdConnectDataMinerServ(uri, connectAppDataMiner).getD();
 
-        //VERIFICAR SI EL NOMBRE DE BALIZA NO ESTA DUPLICADO
+        // VERIFICAR SI EL NOMBRE DE BALIZA NO ESTA DUPLICADO
         ElementoDataMiner elementoDataMiner = new ElementoDataMiner(idConnect, baliza.getClave(), null, null);
         boolean contieneNombre = false;
         try {
-            contieneNombre = apisServicio.obtenerElementoByNameServ(uri, elementoDataMiner).contains(elementoDataMiner.getElementName());
+            contieneNombre = apisServicio.obtenerElementoByNameServ(uri, elementoDataMiner)
+                    .contains(elementoDataMiner.getElementName());
 
-        }catch (Exception  exception){
-            //EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO. OMITIR Y CONTINUAR
+        } catch (Exception exception) {
+            // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
+            // OMITIR Y CONTINUAR
         }
 
-        if (contieneNombre){
+        if (contieneNombre) {
             log.error("EXISTE UN ELEMENTO CON ESE NOMBRE EN DATAMINER");
-            throw new RuntimeException("Error, ya existe una baliza con ese nombre en DataMiner, cambielo o contacte al administrador");
+            throw new RuntimeException(
+                    "Error, ya existe una baliza con ese nombre en DataMiner, cambielo o contacte al administrador");
 
         }
         try {
-            //SALVAR ELEMENTO EN DATAMINER.
+            // SALVAR ELEMENTO EN DATAMINER.
 
             PortsDataMiner portsDataMiner = new PortsDataMiner(
                     "Skyline.DataMiner.Web.Common.v1.DMAElementSerialPortInfo",
@@ -656,8 +690,7 @@ public class ApiControlador {
                     "5055",
                     0,
                     1500,
-                    30000
-            );
+                    30000);
 
             ArrayList<PortsDataMiner> ports = new ArrayList<>();
             ports.add(portsDataMiner);
@@ -668,37 +701,36 @@ public class ApiControlador {
                     "Innova PR400",
                     "Production",
                     "Tracker",
-                    ports
-            );
+                    ports);
             ArrayList<Integer> arrayView = new ArrayList<>();
             arrayView.add(conexiones.getViewIDs());
             DataMiner dataMiner = new DataMiner(idConnect, conexiones.getDmaID(), arrayView, configuracionDataMiner);
 
-            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(uri, dataMiner);
+            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(uri,
+                    dataMiner);
 
-            //AGREGAR A BALIZA:
+            // AGREGAR A BALIZA:
             // DataMiner ID: connectAppResultDataMiner.getD().getDataMinerID())
             // Y Element ID: connectAppResultDataMiner.getD().getID());
 
             baliza.setIdDataminer(String.valueOf(connectAppResultDataMiner.getD().getDataMinerID()));
             baliza.setIdElement(String.valueOf(connectAppResultDataMiner.getD().getID()));
 
-
-            return  ResponseEntity.ok().body(baliza);
-        }catch (Exception exception){
-            log.error("ERROR EN DATAMINER SALVANDO ELEMENTO :"+exception);
+            return ResponseEntity.ok().body(baliza);
+        } catch (Exception exception) {
+            log.error("ERROR EN DATAMINER SALVANDO ELEMENTO :" + exception);
             throw new RuntimeException("Error salvando baliza en dataminer...");
         }
     }
 
-
     /**
      * descripcion: SALVAR ELEMENTO(OPERACION) EN DATAMINER
+     * 
      * @param operacion
      * @return Id de baliza guardada
      */
     @PostMapping("/salvarOperacionDataMiner")
-    public  ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
+    public ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
         try {
             ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
             AtomicInteger totalLicencia = new AtomicInteger();
@@ -708,32 +740,36 @@ public class ApiControlador {
                 totalLicencia.set(d.getAmountElementsMaximum());
             });
 
-            if (totalLicencia.get() == elementosCreados.get()){
-                throw new RuntimeException("Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
+            if (totalLicencia.get() == elementosCreados.get()) {
+                throw new RuntimeException(
+                        "Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
             }
 
-        }catch (Exception exception){
-            log.error("Error obteniendo el limite de dispositivos en el dataminer: "+exception.getMessage());
+        } catch (Exception exception) {
+            log.error("Error obteniendo el limite de dispositivos en el dataminer: " + exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
 
-
-        //VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
-        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(), null, null);
+        // VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
+        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
+                null, null);
 
         try {
-            boolean contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner).contains(elementoDataMiner.getElementName());
-            if (contieneNombre){
+            boolean contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner)
+                    .contains(elementoDataMiner.getElementName());
+            if (contieneNombre) {
                 log.error("EXISTE UNA OPERACION CON ESE NOMBRE EN DATAMINER");
-                throw new RuntimeException("Error, ya existe una operación con ese nombre, cambielo o contacte al administrador");
+                throw new RuntimeException(
+                        "Error, ya existe una operación con ese nombre, cambielo o contacte al administrador");
 
             }
-        }catch (Exception  exception){
-            //EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO. OMITIR Y CONTINUAR
+        } catch (Exception exception) {
+            // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
+            // OMITIR Y CONTINUAR
         }
 
         try {
-            //SALVAR ELEMENTO EN DATAMINER.
+            // SALVAR ELEMENTO EN DATAMINER.
             Optional<Unidades> unidad = apisServicio.findUnidadByIdServ(operacion.getUnidades().getId());
 
             PortsDataMiner portsDataMiner = new PortsDataMiner(
@@ -749,43 +785,47 @@ public class ApiControlador {
             ArrayList<PortsDataMiner> ports = new ArrayList<>();
             ports.add(portsDataMiner);
             ConfiguracionDataMiner configuracionDataMiner = new ConfiguracionDataMiner(
-                    unidad.get().getDenominacion()+"_"+operacion.getDescripcion(), //Nombrecompuesto por Unidad y el nombre de operación elegido
+                    unidad.get().getDenominacion() + "_" + operacion.getDescripcion(), // Nombrecompuesto por Unidad y
+                                                                                       // el nombre de operación elegido
                     "TEST_Operacion",
                     "Geolocalizacion Operacion",
                     "Production",
                     "Operation",
-                    ports
-            );
+                    ports);
             Conexiones conexiones = encontrarConexion("DATAMINER");
             ArrayList<Integer> arrayView = new ArrayList<>();
             arrayView.add(conexiones.getViewIDs());
-            DataMiner dataMiner = new DataMiner(ID_CONNECTION_DATAMINER, conexiones.getDmaID(), arrayView, configuracionDataMiner);
+            DataMiner dataMiner = new DataMiner(ID_CONNECTION_DATAMINER, conexiones.getDmaID(), arrayView,
+                    configuracionDataMiner);
 
-            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(obtenerUriDataMiner(), dataMiner);
+            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio
+                    .salvarElementoDataMinerServ(obtenerUriDataMiner(), dataMiner);
 
-            //AGREGAR A OPERACION:
+            // AGREGAR A OPERACION:
             // DataMiner ID: connectAppResultDataMiner.getD().getDataMinerID())
             // Y Element ID: connectAppResultDataMiner.getD().getID());
 
             operacion.setIdDataminer(String.valueOf(connectAppResultDataMiner.getD().getDataMinerID()));
             operacion.setIdElement(String.valueOf(connectAppResultDataMiner.getD().getID()));
 
-            //CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
+            // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
 
             try {
                 GroupTraccar groupTraccar = new GroupTraccar();
                 groupTraccar.setName(operacion.getDescripcion());
-                operacion.setIdGrupo(Long.valueOf(apisServicio.crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
-            }catch (Exception exception){
-                log.error("ERROR CREANDO GRUPO EN TRACCAR..."+exception);
+                operacion.setIdGrupo(Long.valueOf(apisServicio
+                        .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
+            } catch (Exception exception) {
+                log.error("ERROR CREANDO GRUPO EN TRACCAR..." + exception);
                 throw new RuntimeException("Error creando grupo en TRACCAR...");
             }
 
-            return  ResponseEntity.ok().body(operacion);
-        }catch (Exception exception){
-            log.error("ERROR EN DATAMINER SALVANDO OPERACION :"+exception);
-            if (exception.getMessage().contains("Element could not be created")){
-                throw new RuntimeException("Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
+            return ResponseEntity.ok().body(operacion);
+        } catch (Exception exception) {
+            log.error("ERROR EN DATAMINER SALVANDO OPERACION :" + exception);
+            if (exception.getMessage().contains("Element could not be created")) {
+                throw new RuntimeException(
+                        "Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
             }
             throw new RuntimeException("Error salvando operacion en DATAMINER...");
         }
@@ -2580,7 +2620,8 @@ public class ApiControlador {
             return ResponseEntity.ok(resultadoCantidadLicencia.getD());
         } catch (Exception e) {
             log.error("Error obteniendo cantidad de elementos del servidor dataminer: " + e.getMessage());
-            if (e.getMessage().contains("Connect timed out executing POST") || e.getMessage().contains("Host is unreachable executing POST")) {
+            if (e.getMessage().contains("Connect timed out executing POST")
+                    || e.getMessage().contains("Host is unreachable executing POST")) {
                 throw new RuntimeException(
                         "No existe conexión con el servidor DataMiner, consulte los datos de conexión...");
             }
@@ -2598,13 +2639,15 @@ public class ApiControlador {
         Conexiones conexiones = encontrarConexion("TRACCAR");
         String ipHost = conexiones.getIpServicio();
         String puerto = conexiones.getPuerto();
-        String uriBuild = "http://" + ipHost + ":" + puerto;
+        String uriBuild = (!Strings.isNullOrEmpty(ipHost)
+                && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
+                + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
 
         URI uri = null;
         try {
             uri = new URI(uriBuild);
         } catch (URISyntaxException e) {
-           log.error("Error confeccioando la URI de TRACCAR: {}", e.getMessage());
+            log.error("Error confeccioando la URI de TRACCAR: {}", e.getMessage());
         }
 
         return uri;
