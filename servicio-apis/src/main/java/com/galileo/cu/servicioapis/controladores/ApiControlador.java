@@ -3719,7 +3719,9 @@ public class ApiControlador {
         Conexiones conexiones = encontrarConexion("TRACCAR");
         String ipHost = conexiones.getIpServicio();
         String puerto = conexiones.getPuerto();
-        String uriBuild = "http://" + ipHost + ":" + puerto;
+        String uriBuild = (!Strings.isNullOrEmpty(ipHost)
+                && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
+                + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
 
         URI uri = null;
         try {
