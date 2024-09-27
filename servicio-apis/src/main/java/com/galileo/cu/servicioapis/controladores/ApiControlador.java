@@ -3723,6 +3723,8 @@ public class ApiControlador {
                 && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
                 + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
 
+        log.info("uriBuild: {}", uriBuild);
+
         URI uri = null;
         try {
             uri = new URI(uriBuild);
