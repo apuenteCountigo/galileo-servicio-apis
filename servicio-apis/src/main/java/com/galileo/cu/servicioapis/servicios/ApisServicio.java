@@ -12,7 +12,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public interface ApisServicio {
 
@@ -24,9 +23,10 @@ public interface ApisServicio {
 
     UsuarioTraccar obtenerUsuarioTraccarServ(URI uri, Integer id, String header);
 
-    ResponseEntity<UsuarioTraccar> updateUsuarioTraccarServ(URI uri, Integer id, UsuarioTraccar usuarioTraccar, String header);
+    ResponseEntity<UsuarioTraccar> updateUsuarioTraccarServ(URI uri, Integer id, UsuarioTraccar usuarioTraccar,
+            String header);
 
-    DecodificarToken decodiTokenServ (String token);
+    DecodificarToken decodiTokenServ(String token);
 
     void borrarUsuarioTraccarServ(URI uri, Integer id, String header);
 
@@ -36,28 +36,34 @@ public interface ApisServicio {
 
     void updateObjetivoTraccarServ(URI uri, Integer id, ObjetivoTraccar objetivoTraccar, String authHeader);
 
-    ConnectAppResult obtenerIdConnectDataMinerServ(URI uri,  ConnectAppDataMiner connectAppDataMiner);
+    ConnectAppResult obtenerIdConnectDataMinerServ(URI uri, ConnectAppDataMiner connectAppDataMiner);
 
-    String obtenerElementoByNameServ(URI uri,  ElementoDataMiner elementoDataMiner);
+    String obtenerElementoByNameServ(URI uri, ElementoDataMiner elementoDataMiner);
+
     String obtenerElementoServ(URI uri, ElementoDataMiner elementoDataMiner);
 
-    ConnectAppResultDataMiner salvarElementoDataMinerServ(URI uri,  DataMiner dataMiner);
+    ConnectAppResultDataMiner salvarElementoDataMinerServ(URI uri, DataMiner dataMiner);
 
     ResponseEntity<String> borrarElementoDataMinerServ(URI uri, ElementoDataMiner elementoDataMiner);
 
     GroupTraccar crearGrupoTraccar(URI uri, GroupTraccar groupTraccar, String authHeader);
 
-    ResponseEntity<?> eliminarGrupoTraccar(URI uri, @PathVariable Integer id, @RequestHeader("Authorization") String authHeader);
+    ResponseEntity<?> eliminarGrupoTraccar(URI uri, @PathVariable Integer id,
+            @RequestHeader("Authorization") String authHeader);
 
     ResponseEntity<String> setParameterDataMinerServ(URI uri, SetParameter setParameter);
 
-    ResponseEntity<?> usuarioAgregarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar, String authHeader);
+    ResponseEntity<?> usuarioAgregarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar,
+            String authHeader);
 
-    ResponseEntity<?> usuarioEliminarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar, String authHeader);
+    ResponseEntity<?> usuarioEliminarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar,
+            String authHeader);
 
-    ResponseEntity<?> usuarioAgregarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar, String authHeader);
+    ResponseEntity<?> usuarioAgregarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar,
+            String authHeader);
 
-    ResponseEntity<?> usuarioEliminarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar, String authHeader);
+    ResponseEntity<?> usuarioEliminarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar,
+            String authHeader);
 
     List<UsuarioTraccar> listUsuariosTraccarServ(URI uri, String authHeader);
 
@@ -85,7 +91,10 @@ public interface ApisServicio {
 
     ResponseEntity<?> getGeocerca(URI uri, String conexionToken, Integer dmaId, Integer elementId, Integer parameterId);
 
-   String obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect);
+    String obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect);
 
     Objetivos findObjetivosByDescripcionService(String descripcion);
+
+    ResponseEntity<?> rollBack(URI uriDMA, URI uriTraccar, String conexionToken, Integer dmaId, Integer elementId,
+            Integer parameterId, String authHeader);
 }

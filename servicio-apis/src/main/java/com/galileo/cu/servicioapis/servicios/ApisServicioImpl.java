@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ApisServicioImpl implements ApisServicio{
+public class ApisServicioImpl implements ApisServicio {
 
     private final ConexionFeignClient conexionFeignClient;
     private final TraccarFeignClient traccarFeignClient;
@@ -28,7 +28,11 @@ public class ApisServicioImpl implements ApisServicio{
     private final UsuarioRepository usuarioRepository;
 
     @Autowired
-    public ApisServicioImpl(ConexionFeignClient conexionFeignClient, TraccarFeignClient traccarFeignClient, ApisRepository apisRepository, DataMinerFeignClient dataMinerFeignClient, UnidadesRepository unidadesRepository, BalizaRepository balizaRepository, OperacionRepository operacionRepository, ObjetivoRepository objetivoRepository, UsuarioRepository usuarioRepository) {
+    public ApisServicioImpl(ConexionFeignClient conexionFeignClient, TraccarFeignClient traccarFeignClient,
+            ApisRepository apisRepository, DataMinerFeignClient dataMinerFeignClient,
+            UnidadesRepository unidadesRepository, BalizaRepository balizaRepository,
+            OperacionRepository operacionRepository, ObjetivoRepository objetivoRepository,
+            UsuarioRepository usuarioRepository) {
         this.conexionFeignClient = conexionFeignClient;
         this.traccarFeignClient = traccarFeignClient;
         this.apisRepository = apisRepository;
@@ -51,8 +55,9 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
-    public ResponseEntity<UsuarioTraccar> salvarUsuarioTraccarServ(URI uri, UsuarioTraccar usuarioTraccar, String authHeader) {
-       return traccarFeignClient.salvarUsuarioTraccar(uri, usuarioTraccar, authHeader);
+    public ResponseEntity<UsuarioTraccar> salvarUsuarioTraccarServ(URI uri, UsuarioTraccar usuarioTraccar,
+            String authHeader) {
+        return traccarFeignClient.salvarUsuarioTraccar(uri, usuarioTraccar, authHeader);
     }
 
     @Override
@@ -61,7 +66,8 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
-    public ResponseEntity<UsuarioTraccar> updateUsuarioTraccarServ(URI uri, Integer id, UsuarioTraccar usuarioTraccar, String header) {
+    public ResponseEntity<UsuarioTraccar> updateUsuarioTraccarServ(URI uri, Integer id, UsuarioTraccar usuarioTraccar,
+            String header) {
         return traccarFeignClient.updateUsuarioTraccar(uri, id, usuarioTraccar, header);
     }
 
@@ -69,7 +75,6 @@ public class ApisServicioImpl implements ApisServicio{
     public DecodificarToken decodiTokenServ(String token) {
         return apisRepository.decodificarToken(token);
     }
-
 
     @Override
     public void borrarUsuarioTraccarServ(URI uri, Integer id, String header) {
@@ -118,7 +123,7 @@ public class ApisServicioImpl implements ApisServicio{
 
     @Override
     public GroupTraccar crearGrupoTraccar(URI uri, GroupTraccar groupTraccar, String authHeader) {
-        return traccarFeignClient.crearGrupoTraccar(uri,groupTraccar, authHeader);
+        return traccarFeignClient.crearGrupoTraccar(uri, groupTraccar, authHeader);
     }
 
     @Override
@@ -128,27 +133,31 @@ public class ApisServicioImpl implements ApisServicio{
 
     @Override
     public ResponseEntity<String> setParameterDataMinerServ(URI uri, SetParameter setParameter) {
-        return  dataMinerFeignClient.setParameterDataMiner(uri, setParameter);
+        return dataMinerFeignClient.setParameterDataMiner(uri, setParameter);
     }
 
     @Override
-    public ResponseEntity<?> usuarioAgregarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar, String authHeader) {
+    public ResponseEntity<?> usuarioAgregarPermisoDevicesTraccarServ(URI uri,
+            PermisosDevicesTraccar permisosDevicesTraccar, String authHeader) {
         return traccarFeignClient.usuarioAgregarPermisoDevicesTraccar(uri, permisosDevicesTraccar, authHeader);
     }
 
     @Override
-    public ResponseEntity<?> usuarioEliminarPermisoDevicesTraccarServ(URI uri, PermisosDevicesTraccar permisosDevicesTraccar, String authHeader) {
-        return traccarFeignClient.usuarioEliminarPermisoDevicesTraccar(uri,permisosDevicesTraccar,authHeader);
+    public ResponseEntity<?> usuarioEliminarPermisoDevicesTraccarServ(URI uri,
+            PermisosDevicesTraccar permisosDevicesTraccar, String authHeader) {
+        return traccarFeignClient.usuarioEliminarPermisoDevicesTraccar(uri, permisosDevicesTraccar, authHeader);
     }
 
     @Override
-    public ResponseEntity<?> usuarioAgregarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar, String authHeader) {
-        return traccarFeignClient.usuarioAgregarPermisoGroupsTraccar(uri,permisosGroupsTraccar,authHeader);
+    public ResponseEntity<?> usuarioAgregarPermisoGroupsTraccarServ(URI uri,
+            PermisosGroupsTraccar permisosGroupsTraccar, String authHeader) {
+        return traccarFeignClient.usuarioAgregarPermisoGroupsTraccar(uri, permisosGroupsTraccar, authHeader);
     }
 
     @Override
-    public ResponseEntity<?> usuarioEliminarPermisoGroupsTraccarServ(URI uri, PermisosGroupsTraccar permisosGroupsTraccar, String authHeader) {
-        return traccarFeignClient.usuarioEliminarPermisoGrousTraccar(uri,permisosGroupsTraccar,authHeader);
+    public ResponseEntity<?> usuarioEliminarPermisoGroupsTraccarServ(URI uri,
+            PermisosGroupsTraccar permisosGroupsTraccar, String authHeader) {
+        return traccarFeignClient.usuarioEliminarPermisoGrousTraccar(uri, permisosGroupsTraccar, authHeader);
     }
 
     @Override
@@ -157,7 +166,8 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
-    public ResponseEntity<?> obtenerParametrosBaliza(URI uri, GetParametersByPageForElement getParametersByPageForElement) {
+    public ResponseEntity<?> obtenerParametrosBaliza(URI uri,
+            GetParametersByPageForElement getParametersByPageForElement) {
         return dataMinerFeignClient.obtenerParametrosBaliza(uri, getParametersByPageForElement);
     }
 
@@ -212,7 +222,8 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
-    public ResponseEntity<?> getGeocerca(URI uri, String conexionToken, Integer dmaId, Integer elementId, Integer parameterId) {
+    public ResponseEntity<?> getGeocerca(URI uri, String conexionToken, Integer dmaId, Integer elementId,
+            Integer parameterId) {
         SetParameter parameter = new SetParameter();
         parameter.setConnection(conexionToken);
         parameter.setDmaID(dmaId);
@@ -224,12 +235,19 @@ public class ApisServicioImpl implements ApisServicio{
     }
 
     @Override
-    public String  obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect) {
+    public String obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect) {
         return dataMinerFeignClient.obtenerCantidadLicenciaDataMiner(uri, idConect);
     }
 
     @Override
     public Objetivos findObjetivosByDescripcionService(String descripcion) {
         return objetivoRepository.findObjetivosByDescripcion(descripcion);
+    }
+
+    @Override
+    public ResponseEntity<?> rollBack(URI uriDMA, URI uriTraccar, String conexionToken, Integer dmaId,
+            Integer elementId, Integer parameterId, String authHeader) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'rollBack'");
     }
 }
