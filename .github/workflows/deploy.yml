@@ -47,6 +47,7 @@ jobs:
             ssh -i ~/id_rsaalain mome@192.168.0.98 '
             cd galileo-newdev/apis/galileo-servicio-apis &&
             git fetch origin &&
+            git checkout main &&
             git reset --hard origin/main &&
             git pull &&
             cd servicio-apis &&
