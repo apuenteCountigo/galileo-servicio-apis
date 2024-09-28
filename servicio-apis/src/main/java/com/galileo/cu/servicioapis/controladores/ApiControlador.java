@@ -15,6 +15,8 @@ import com.galileo.cu.servicioapis.utils.Utils;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
+import net.bytebuddy.implementation.bytecode.Throw;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -828,12 +830,26 @@ public class ApiControlador {
             // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
 
             try {
+                if (operacion.getDescripcion() == "TRACCARFAIL")
+                    throw new RuntimeException("Error creando grupo en TRACCAR: 'TRACCARFAIL'...");
+
                 GroupTraccar groupTraccar = new GroupTraccar();
                 groupTraccar.setName(operacion.getDescripcion());
                 operacion.setIdGrupo(Long.valueOf(apisServicio
                         .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
             } catch (Exception exception) {
                 log.error("ERROR CREANDO GRUPO EN TRACCAR..." + exception);
+                try {
+                    elementoDataMiner.setDmaID(Integer.valueOf(operacion.getIdDataminer()));
+                    elementoDataMiner.setElementID(Integer.valueOf(operacion.getIdElement()));
+                    apisServicio.borrarElementoDataMinerServ(obtenerUriDataMiner(), elementoDataMiner);
+                    log.info("Fue eliminado por la lógica (Rollback), un elemento en DMA. idDMA: {}, idElement: {}",
+                            elementoDataMiner.getDmaID(), elementoDataMiner.getElementID());
+                } catch (Exception e) {
+                    log.error(
+                            "Fallo eliminando elemento en DMA, luego de fallar el intento de crear grupo en traccar. Acción crear una nueva operación.",
+                            e.getMessage());
+                }
                 throw new RuntimeException("Error creando grupo en TRACCAR...");
             }
 
