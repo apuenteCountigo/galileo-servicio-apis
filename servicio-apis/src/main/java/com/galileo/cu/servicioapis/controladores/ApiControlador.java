@@ -845,15 +845,16 @@ public class ApiControlador {
 
             try {
                 if (operacion.getDescripcion().equals("TRACCARFAIL"))
-                    throw new RuntimeException("Error creando grupo en TRACCAR: 'TRACCARFAIL'...");
+                    throw new RuntimeException("Fallo creando grupo en TRACCAR: 'TRACCARFAIL'...");
 
                 GroupTraccar groupTraccar = new GroupTraccar();
                 groupTraccar.setName(operacion.getDescripcion());
                 operacion.setIdGrupo(Long.valueOf(apisServicio
                         .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
             } catch (Exception exception) {
-                log.error("ERROR CREANDO GRUPO EN TRACCAR..." + exception);
+                log.error("Fallo creando grupo en Traccar...", exception.getMessage());
                 try {
+                    log.info("Iniciando Rollback. Acción: 'Eliminar elemento en DMA'");
                     elementoDataMiner.setDmaID(Integer.valueOf(operacion.getIdDataminer()));
                     elementoDataMiner.setElementID(Integer.valueOf(operacion.getIdElement()));
                     apisServicio.borrarElementoDataMinerServ(obtenerUriDataMiner(), elementoDataMiner);
@@ -861,20 +862,29 @@ public class ApiControlador {
                             elementoDataMiner.getDmaID(), elementoDataMiner.getElementID());
                 } catch (Exception e) {
                     log.error(
-                            "Fallo eliminando elemento en DMA, luego de fallar el intento de crear grupo en traccar. Acción crear una nueva operación.",
+                            "Fallo eliminando elemento en DMA, luego de fallar el intento de crear grupo en traccar. Origen, crear una nueva operación.",
                             e.getMessage());
                 }
-                throw new RuntimeException("Error creando grupo en TRACCAR...");
+                log.error("Fallo creando grupo en Traccar, mientras se intentaba crear una nueva operación.");
+                throw new RuntimeException(
+                        "Fallo creando grupo en Traccar, mientras se intentaba crear una nueva operación.");
             }
 
             return ResponseEntity.ok().body(operacion);
         } catch (Exception exception) {
-            log.error("ERROR EN DATAMINER SALVANDO OPERACION :" + exception);
-            if (exception.getMessage().contains("Element could not be created")) {
+            if (exception.getMessage().contains("Fallo")) {
+                throw new RuntimeException(exception.getMessage());
+            } else if (exception.getMessage().contains("Element could not be created")) {
+                log.error(
+                        "Fallo salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...",
+                        exception);
                 throw new RuntimeException(
-                        "Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
+                        "Fallo salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
+            } else {
+                String err = "Fallo general creando nueva operación, en las apis externas";
+                log.error(err, exception);
+                throw new RuntimeException(err);
             }
-            throw new RuntimeException("Error salvando operacion en DATAMINER...");
         }
     }
 
