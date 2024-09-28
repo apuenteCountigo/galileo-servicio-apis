@@ -742,6 +742,20 @@ public class ApiControlador {
         }
     }
 
+    @PostMapping("/rollBackOperacion")
+    public ResponseEntity<String> rollBackOperacionDataMiner(@RequestBody Operaciones operacion) {
+        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
+                Integer.valueOf(operacion.getIdDataminer()), Integer.valueOf(operacion.getIdElement()));
+        try {
+            apisServicio.borrarElementoDataMinerServ(obtenerUriDataMiner(), elementoDataMiner);
+            log.info("Fue eliminado por la lógica (Rollback), un elemento en DMA. idDMA: {}, idElement: {}",
+                    elementoDataMiner.getDmaID(), elementoDataMiner.getElementID());
+        } catch (Exception e) {
+
+        }
+        return ResponseEntity.ok("ok");
+    }
+
     /**
      * descripcion: SALVAR ELEMENTO(OPERACION) EN DATAMINER
      * 
@@ -830,7 +844,7 @@ public class ApiControlador {
             // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
 
             try {
-                if (operacion.getDescripcion() == "TRACCARFAIL")
+                if (operacion.getDescripcion().equals("TRACCARFAIL"))
                     throw new RuntimeException("Error creando grupo en TRACCAR: 'TRACCARFAIL'...");
 
                 GroupTraccar groupTraccar = new GroupTraccar();
