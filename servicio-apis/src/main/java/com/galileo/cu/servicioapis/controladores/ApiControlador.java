@@ -742,7 +742,7 @@ public class ApiControlador {
         }
     }
 
-    @PostMapping("/rollBackOperacion")
+    @PostMapping("/rollBackOperacionDataMiner")
     public ResponseEntity<String> rollBackOperacionDataMiner(@RequestBody Operaciones operacion) {
         ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
                 Integer.valueOf(operacion.getIdDataminer()), Integer.valueOf(operacion.getIdElement()));
@@ -751,7 +751,25 @@ public class ApiControlador {
             log.info("Fue eliminado por la lógica (Rollback), un elemento en DMA. idDMA: {}, idElement: {}",
                     elementoDataMiner.getDmaID(), elementoDataMiner.getElementID());
         } catch (Exception e) {
+            String err = "Fallo intentando eliminar elemento en DMA, haciendo rollback por fallo al insertar nueva operación, en la BD.";
+            log.error(err, e.getMessage());
+            throw new RuntimeException(err);
+        }
+        return ResponseEntity.ok("ok");
+    }
 
+    @PostMapping("/rollBackOperacionTraccar")
+    public ResponseEntity<String> rollBackOperacionTraccar(@RequestBody Operaciones operacion) {
+        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
+                Integer.valueOf(operacion.getIdDataminer()), Integer.valueOf(operacion.getIdElement()));
+        try {
+            apisServicio.borrarElementoDataMinerServ(obtenerUriDataMiner(), elementoDataMiner);
+            log.info("Fue eliminado por la lógica (Rollback), un elemento en DMA. idDMA: {}, idElement: {}",
+                    elementoDataMiner.getDmaID(), elementoDataMiner.getElementID());
+        } catch (Exception e) {
+            String err = "Fallo intentando eliminar elemento en DMA, haciendo rollback por fallo al insertar nueva operación, en la BD.";
+            log.error(err, e.getMessage());
+            throw new RuntimeException(err);
         }
         return ResponseEntity.ok("ok");
     }
