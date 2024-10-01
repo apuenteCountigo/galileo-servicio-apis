@@ -2734,6 +2734,12 @@ public class ApiControlador {
         } catch (Exception exception) {
             log.error("Error en tarea programada: " + exception.getMessage());
         }
+
+        // Test for balizas check not include modelos balizas.
+        Balizas bal = new Balizas();
+        bal.setClave("test");
+        bal.setModelo("test");
+        log.info("Calve: {}, Modelo: {}", bal.getClave(), bal.getModelo());
     }
 
     // Obtener uri dataminer
