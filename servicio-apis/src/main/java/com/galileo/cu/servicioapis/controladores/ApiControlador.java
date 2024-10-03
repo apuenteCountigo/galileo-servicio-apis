@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -779,9 +780,10 @@ public class ApiControlador {
      * 
      * @param operacion
      * @return Id de baliza guardada
+     * @throws IOException
      */
     @PostMapping("/salvarOperacionDataMiner")
-    public ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
+    public ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) throws IOException {
         // try {
         // ArrayList<LicenciaDataMiner> licenciaDataMiners =
         // obtenerLimiteElementosDataMiner().getBody();
@@ -836,7 +838,6 @@ public class ApiControlador {
                 unidad.get().getDenominacion() + "_" + operacion.getDescripcion(),
                 null, null);
 
-        log.info("{}_{}", unidad.get().getDenominacion(), operacion.getDescripcion());
         boolean contieneNombre = false;
         try {
             String resElement = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner);
@@ -856,7 +857,7 @@ public class ApiControlador {
         if (contieneNombre) {
             String err = "Fallo, ya existe una operación con ese nombre en esa unidad en DMA, cámbielo o contacte al administrador";
             log.error("{}", err);
-            throw new RuntimeException(err);
+            throw new IOException(err);
         }
 
         try {
