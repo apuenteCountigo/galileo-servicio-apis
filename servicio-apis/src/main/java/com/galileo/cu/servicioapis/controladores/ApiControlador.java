@@ -782,41 +782,68 @@ public class ApiControlador {
      */
     @PostMapping("/salvarOperacionDataMiner")
     public ResponseEntity<Operaciones> salvarOperacionDataMiner(@RequestBody Operaciones operacion) {
+        // try {
+        // ArrayList<LicenciaDataMiner> licenciaDataMiners =
+        // obtenerLimiteElementosDataMiner().getBody();
+        // AtomicInteger totalLicencia = new AtomicInteger();
+        // AtomicInteger elementosCreados = new AtomicInteger();
+        // licenciaDataMiners.forEach(d -> {
+        // elementosCreados.set(d.getAmountElementsActive());
+        // totalLicencia.set(d.getAmountElementsMaximum());
+        // });
+
+        // if (totalLicencia.get() == elementosCreados.get()) {
+        // throw new RuntimeException(
+        // "Se ha alcanzado el número máximo de elementos permitidos en el DataMiner,
+        // por favor contacte con un Superadministrador");
+        // }
+
+        // } catch (Exception exception) {
+        // log.error("Error obteniendo el limite de dispositivos en el dataminer: " +
+        // exception.getMessage());
+        // throw new RuntimeException(exception.getMessage());
+        // }
+
+        // CONSULTANDO SI SE HA LLEGADO A LA CANTIDAD DE ELEMENTOS LIMITE EN DMA
+        boolean isQtyElementFull = false;
         try {
-            ArrayList<LicenciaDataMiner> licenciaDataMiners = obtenerLimiteElementosDataMiner().getBody();
-            AtomicInteger totalLicencia = new AtomicInteger();
-            AtomicInteger elementosCreados = new AtomicInteger();
-            licenciaDataMiners.forEach(d -> {
-                elementosCreados.set(d.getAmountElementsActive());
-                totalLicencia.set(d.getAmountElementsMaximum());
-            });
+            isQtyElementFull = apisServicio.isQtyElementFull(URI_CONNECTION_DATAMINER,
+                    new ConexionId(ID_CONNECTION_DATAMINER));
+        } catch (Exception e) {
+            String err = "Fallo obteniendo límite de elementos en DMA";
+            log.error("{} : {}", err, e.getMessage());
+            throw new RuntimeException(err);
+        }
 
-            if (totalLicencia.get() == elementosCreados.get()) {
-                throw new RuntimeException(
-                        "Se ha alcanzado el número máximo de elementos permitidos en el DataMiner, por favor contacte con un Superadministrador");
-            }
-
-        } catch (Exception exception) {
-            log.error("Error obteniendo el limite de dispositivos en el dataminer: " + exception.getMessage());
-            throw new RuntimeException(exception.getMessage());
+        if (isQtyElementFull) {
+            String err = "Fallo, fue alcanzado el número máximo de elementos permitidos en DMA";
+            log.error("{}", err);
+            throw new RuntimeException(err);
         }
 
         // VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
-        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER, operacion.getDescripcion(),
+        ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER,
+                operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion(),
                 null, null);
 
+        boolean contieneNombre = false;
         try {
-            boolean contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner)
-                    .contains(elementoDataMiner.getElementName());
-            if (contieneNombre) {
-                log.error("EXISTE UNA OPERACION CON ESE NOMBRE EN DATAMINER");
-                throw new RuntimeException(
-                        "Error, ya existe una operación con ese nombre, cambielo o contacte al administrador");
-
-            }
+            contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner)
+                    .contains(operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion());
         } catch (Exception exception) {
             // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
             // OMITIR Y CONTINUAR
+            if (!exception.getMessage().contains("No such element")) {
+                String err = "Fallo, verificando si existe una operación con ese nombre en esa unidad en DMA.";
+                log.error("{} : {}", err, exception.getMessage());
+                throw new RuntimeException(err);
+            }
+        }
+
+        if (contieneNombre) {
+            String err = "Fallo, ya existe una operación con ese nombre en esa unidad en DMA, cámbielo o contacte al administrador";
+            log.error("{}", err);
+            throw new RuntimeException(err);
         }
 
         try {
@@ -3752,9 +3779,8 @@ public class ApiControlador {
 
         try {
             ConexionId conexionId = new ConexionId(obtenerIDConnect());
-            ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
-                    apisServicio.obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId),
-                    ResultadoCantidadLicencia.class);
+            ResultadoCantidadLicencia resultadoCantidadLicencia = apisServicio
+                    .obtenerCantidadLicenciaDataMinerServ(obtenerUriDataMiner(), conexionId);
             return ResponseEntity.ok(resultadoCantidadLicencia.getD());
         } catch (Exception e) {
             log.error("Error obteniendo cantidad de elementos del servidor dataminer: " + e.getMessage());

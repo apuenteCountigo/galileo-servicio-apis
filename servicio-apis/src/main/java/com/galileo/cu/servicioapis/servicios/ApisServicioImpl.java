@@ -6,6 +6,8 @@ import com.galileo.cu.servicioapis.clientes.DataMinerFeignClient;
 import com.galileo.cu.servicioapis.clientes.TraccarFeignClient;
 import com.galileo.cu.servicioapis.entidades.*;
 import com.galileo.cu.servicioapis.repositorios.*;
+import com.google.gson.Gson;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -235,8 +237,23 @@ public class ApisServicioImpl implements ApisServicio {
     }
 
     @Override
-    public String obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect) {
-        return dataMinerFeignClient.obtenerCantidadLicenciaDataMiner(uri, idConect);
+    public ResultadoCantidadLicencia obtenerCantidadLicenciaDataMinerServ(URI uri, ConexionId idConect) {
+        ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
+                dataMinerFeignClient.obtenerCantidadLicenciaDataMiner(uri, idConect), ResultadoCantidadLicencia.class);
+        return resultadoCantidadLicencia;
+    }
+
+    @Override
+    public boolean isQtyElementFull(URI uri, ConexionId idConect) {
+        ResultadoCantidadLicencia resultadoCantidadLicencia = new Gson().fromJson(
+                dataMinerFeignClient.obtenerCantidadLicenciaDataMiner(uri, idConect), ResultadoCantidadLicencia.class);
+
+        if (resultadoCantidadLicencia.getD().get(0).getAmountElementsActive() == resultadoCantidadLicencia.getD().get(0)
+                .getAmountElementsMaximum()) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

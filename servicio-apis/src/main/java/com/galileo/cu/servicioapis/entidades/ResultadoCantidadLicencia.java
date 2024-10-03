@@ -12,5 +12,5 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResultadoCantidadLicencia {
-    private ArrayList<LicenciaDataMiner> d;
+    public ArrayList<LicenciaDataMiner> d;
 }

@@ -7,12 +7,18 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.galileo.cu.servicioapis.entidades.ConexionId;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class DMAService {
+
+    public void GetQtyElementDMA(ConexionId conexionId) {
+
+    }
+
     // @Autowired
     // KafkaTemplate<String, String> kafkaTemplate;
 
@@ -20,18 +26,19 @@ public class DMAService {
     // ObjectMapper objectMapper;
 
     // @KafkaListener(topics = "crear-operacion-dma")
-    public void crearOperacionDMA(String mensaje) throws JsonProcessingException {
-        log.info("crearOperacionDMA::::" + mensaje);
-        // OperacionDTO operacion = objectMapper.readValue(mensaje, OperacionDTO.class);
-        // try {
-        // // Lógica para crear operación en DMA
-        // String idDMA = "DMA-" + UUID.randomUUID().toString();
-        // DMAResultadoDTO resultado = new DMAResultadoDTO(operacion, idDMA);
-        // kafkaTemplate.send("dma-operacion-creada",
-        // objectMapper.writeValueAsString(resultado));
-        // } catch (Exception e) {
-        // kafkaTemplate.send("dma-error", "Error al crear operación en DMA: " +
-        // e.getMessage());
-        // }
-    }
+    // public void crearOperacionDMA(String mensaje) throws JsonProcessingException
+    // {
+    // log.info("crearOperacionDMA::::" + mensaje);
+    // OperacionDTO operacion = objectMapper.readValue(mensaje, OperacionDTO.class);
+    // try {
+    // // Lógica para crear operación en DMA
+    // String idDMA = "DMA-" + UUID.randomUUID().toString();
+    // DMAResultadoDTO resultado = new DMAResultadoDTO(operacion, idDMA);
+    // kafkaTemplate.send("dma-operacion-creada",
+    // objectMapper.writeValueAsString(resultado));
+    // } catch (Exception e) {
+    // kafkaTemplate.send("dma-error", "Error al crear operación en DMA: " +
+    // e.getMessage());
+    // }
+    // }
 }
