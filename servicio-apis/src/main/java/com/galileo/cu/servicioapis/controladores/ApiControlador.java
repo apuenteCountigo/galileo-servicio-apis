@@ -821,18 +821,28 @@ public class ApiControlador {
             throw new RuntimeException(err);
         }
 
+        // SALVAR ELEMENTO EN DATAMINER.
+        Optional<Unidades> unidad = null;
+        try {
+            unidad = apisServicio.findUnidadByIdServ(operacion.getUnidades().getId());
+        } catch (Exception e) {
+            String err = "Fallo, obteniendo la unidad a la que pertenecerá la operación";
+            log.error("{} : {}", err, e.getMessage());
+            throw new RuntimeException(err);
+        }
+
         // VERIFICAR SI EL NOMBRE DE LA OPERACION NO ESTA DUPLICADO
         ElementoDataMiner elementoDataMiner = new ElementoDataMiner(ID_CONNECTION_DATAMINER,
-                operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion(),
+                unidad.get().getDenominacion() + "_" + operacion.getDescripcion(),
                 null, null);
 
-        log.info("{}_{}", operacion.getUnidades().getDenominacion(), operacion.getDescripcion());
+        log.info("{}_{}", unidad.get().getDenominacion(), operacion.getDescripcion());
         boolean contieneNombre = false;
         try {
             String resElement = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner);
-            log.info("{}_{} : {}", operacion.getUnidades().getDenominacion(), operacion.getDescripcion(), resElement);
+            log.info("{}_{} : {}", unidad.get().getDenominacion(), operacion.getDescripcion(), resElement);
             contieneNombre = resElement
-                    .contains(operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion());
+                    .contains(unidad.get().getDenominacion() + "_" + operacion.getDescripcion());
         } catch (Exception exception) {
             // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
             // OMITIR Y CONTINUAR
@@ -850,9 +860,6 @@ public class ApiControlador {
         }
 
         try {
-            // SALVAR ELEMENTO EN DATAMINER.
-            Optional<Unidades> unidad = apisServicio.findUnidadByIdServ(operacion.getUnidades().getId());
-
             PortsDataMiner portsDataMiner = new PortsDataMiner(
                     "Skyline.DataMiner.Web.Common.v1.DMAElementSerialPortInfo",
                     "any",
