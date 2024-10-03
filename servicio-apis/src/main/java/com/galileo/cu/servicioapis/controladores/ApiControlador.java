@@ -828,7 +828,9 @@ public class ApiControlador {
 
         boolean contieneNombre = false;
         try {
-            contieneNombre = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner)
+            String resElement = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner);
+            log.info("{}_{} : {}", operacion.getUnidades().getDenominacion(), operacion.getDescripcion(), resElement);
+            contieneNombre = resElement
                     .contains(operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion());
         } catch (Exception exception) {
             // EL DATAMINER DEVUELVE ERROR SI NO EXISTE ELEMENTO CON EL NOMBRE BUSCADO.
