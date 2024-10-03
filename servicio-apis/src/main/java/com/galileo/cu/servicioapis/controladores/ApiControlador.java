@@ -826,6 +826,7 @@ public class ApiControlador {
                 operacion.getUnidades().getDenominacion() + "_" + operacion.getDescripcion(),
                 null, null);
 
+        log.info("{}_{}", operacion.getUnidades().getDenominacion(), operacion.getDescripcion());
         boolean contieneNombre = false;
         try {
             String resElement = apisServicio.obtenerElementoByNameServ(obtenerUriDataMiner(), elementoDataMiner);
