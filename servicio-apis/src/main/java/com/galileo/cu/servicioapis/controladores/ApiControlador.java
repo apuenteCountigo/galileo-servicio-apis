@@ -496,7 +496,7 @@ public class ApiControlador {
                 if (exception.getMessage().contains("No such element")) {
                     err = "Fallo, la baliza no se encuentra en DMA";
                 }
-                log.error(err + exception);
+                log.error(err, exception);
                 throw new RuntimeException(err);
             }
 
@@ -985,7 +985,7 @@ public class ApiControlador {
             if (exception.getMessage().contains("No such element")) {
                 err = "Fallo, la baliza no se encuentra en DMA";
             }
-            log.error(err + exception);
+            log.error(err, exception);
             throw new RuntimeException(err);
         }
     }
@@ -1019,7 +1019,7 @@ public class ApiControlador {
             if (exception.getMessage().contains("No such element")) {
                 err = "Fallo, la baliza no se encuentra en DMA";
             }
-            log.error(err + exception);
+            log.error(err, exception);
             throw new RuntimeException(err);
         }
 
