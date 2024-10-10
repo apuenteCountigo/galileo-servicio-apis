@@ -492,8 +492,12 @@ public class ApiControlador {
                 establecerParametroInt(Integer.valueOf(baliza.getIdDataminer()), Integer.valueOf(baliza.getIdElement()),
                         3016, 5);
             } catch (Exception exception) {
-                log.error("error cambiando estado de la baliza en dataminer :" + exception);
-                throw new RuntimeException("Error cambiando estado de la baliza en dataminer... ");
+                String err = "Fallo cambiando estado de la baliza en dataminer :";
+                if (exception.getMessage().contains("No such element")) {
+                    err = "Fallo, la baliza no se encuentra en DMA";
+                }
+                log.error(err + exception);
+                throw new RuntimeException(err);
             }
 
         }
@@ -977,8 +981,12 @@ public class ApiControlador {
                     3016, valorEstado);
             return ResponseEntity.ok().body("Estado de baliza cambiado correctamente");
         } catch (Exception exception) {
-            log.error("Error cambiando estado de la baliza en dataminer :" + exception);
-            throw new RuntimeException("Error cambiando estado de la baliza en DataMiner...");
+            String err = "Fallo cambiando estado de la baliza en dataminer :";
+            if (exception.getMessage().contains("No such element")) {
+                err = "Fallo, la baliza no se encuentra en DMA";
+            }
+            log.error(err + exception);
+            throw new RuntimeException(err);
         }
     }
 
@@ -1007,8 +1015,12 @@ public class ApiControlador {
             establecerParametroInt(Integer.valueOf(baliza.getIdDataminer()), Integer.valueOf(baliza.getIdElement()),
                     3016, 5);
         } catch (Exception exception) {
-            log.error("error cambiando estado de la baliza en dataminer :" + exception);
-            throw new RuntimeException("Error cambiando estado de la baliza en DataMiner...");
+            String err = "Fallo cambiando estado de la baliza en dataminer :";
+            if (exception.getMessage().contains("No such element")) {
+                err = "Fallo, la baliza no se encuentra en DMA";
+            }
+            log.error(err + exception);
+            throw new RuntimeException(err);
         }
 
         // ASIGNAR UNIDAD
