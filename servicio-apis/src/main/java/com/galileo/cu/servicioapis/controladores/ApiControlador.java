@@ -1020,7 +1020,7 @@ public class ApiControlador {
                 err = "Fallo, la baliza no se encuentra en DMA";
             }
             log.error(err, exception);
-            throw new RuntimeException(err);
+            throw new RuntimeException("@@@@@ERR####");
         }
 
         // ASIGNAR UNIDAD
