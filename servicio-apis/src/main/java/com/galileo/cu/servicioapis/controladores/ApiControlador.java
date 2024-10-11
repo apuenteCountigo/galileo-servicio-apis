@@ -854,7 +854,7 @@ public class ApiControlador {
             apisServicio.borrarElementoDataMinerServ(obtenerUriDataMiner(), elementoDataMiner);
             return ResponseEntity.ok().body("Baliza borrada en DATAMINER...");
         } catch (Exception exception) {
-            log.error("ERROR BORRANDO BALIZA EN DATAMINER :" + exception);
+            log.error("ERROR BORRANDO BALIZA EN DATAMINER :" + exception.getMessage());
             throw new RuntimeException("Error borrando baliza en DATAMINER");
         }
 
