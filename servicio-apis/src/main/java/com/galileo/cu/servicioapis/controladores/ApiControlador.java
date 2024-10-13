@@ -350,11 +350,11 @@ public class ApiControlador {
                 return ResponseEntity.ok().body(usuario);
             }
         } catch (Exception exception) {
-            log.error("Error salvando usuario en TRACCAR " + exception);
-            if (exception.getMessage().contains("El correo ya esta siendo utilizado")) {
-                throw new RuntimeException("El correo ya esta siendo utilizado en el sistema");
-            } else
-                throw new RuntimeException("Error salvando usuario en TRACCAR");
+            String err = "Fallo al Insertar Usuario en Traccar ";
+            if (exception.getMessage().contains("El correo ya esta siendo utilizado"))
+                err = "Fallo, el correo ya existe en traccar";
+            log.error(err, exception.getMessage());
+            throw new RuntimeException(err);
         }
         return null;
     }
