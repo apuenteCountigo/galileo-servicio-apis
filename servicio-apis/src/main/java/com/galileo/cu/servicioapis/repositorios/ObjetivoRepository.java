@@ -19,4 +19,8 @@ public interface ObjetivoRepository extends CrudRepository<Objetivos, Long> {
     List<Objetivos> encontrarObjPorOpeUni(Unidades unidad);
 
     Objetivos findObjetivosByDescripcion(String descripcion);
+
+    Objetivos findByDescripcionAndBaliza_Id(String descripcion, Long idBaliza);
+
+    Objetivos findObjetivosById(long id);
 }
