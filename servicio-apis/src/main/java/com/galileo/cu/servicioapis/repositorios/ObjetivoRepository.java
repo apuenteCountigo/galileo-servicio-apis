@@ -20,7 +20,7 @@ public interface ObjetivoRepository extends CrudRepository<Objetivos, Long> {
 
     Objetivos findObjetivosByDescripcion(String descripcion);
 
-    Objetivos findByDescripcionAndBaliza_Id(String descripcion, Long idBaliza);
+    Objetivos findByDescripcionAndBalizas_Id(String descripcion, Long idBaliza);
 
     Objetivos findObjetivosById(long id);
 }
