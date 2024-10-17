@@ -916,6 +916,8 @@ public class ApiControlador {
         // 6 - En Reparación En BD: 9
         // 7 - En Instalación En BD: 10
 
+        log.info("Cambiando el estado de la baliza en DMA.");
+        log.info(baliza.toString());
         try {
 
             Objetivos objetivo = null;
@@ -965,9 +967,18 @@ public class ApiControlador {
                                 Integer.valueOf(baliza.getIdElement()), 2006, null);
                         establecerParametroString(Integer.valueOf(baliza.getIdDataminer()),
                                 Integer.valueOf(baliza.getIdElement()), 2003, String.valueOf(0));
-                        baliza.setObjetivo(null);
-                        baliza.setOperacion(null);
-                        balizaRepository.save(baliza);
+
+                        boolean isChanged = false;
+                        if (baliza.getObjetivo() != null) {
+                            baliza.setObjetivo(null);
+                            isChanged = true;
+                        }
+                        if (baliza.getOperacion() != null) {
+                            baliza.setOperacion(null);
+                            isChanged = true;
+                        }
+                        if (isChanged == true)
+                            balizaRepository.save(baliza);
                     } catch (Exception exception) {
                         log.error("Error desasignando baliza a objetivo en dataminer :" + exception);
                     }
@@ -979,6 +990,10 @@ public class ApiControlador {
             // 3016 - Este id es fijo corresponde al parámetro Unidad en todas las balizas
             establecerParametroInt(Integer.valueOf(baliza.getIdDataminer()), Integer.valueOf(baliza.getIdElement()),
                     3016, valorEstado);
+
+            log.info("Después de cambiar el estado de la baliza en DMA.");
+            log.info(baliza.toString());
+
             return ResponseEntity.ok().body("Estado de baliza cambiado correctamente");
         } catch (Exception exception) {
             String err = "Fallo cambiando estado de la baliza en dataminer :";
