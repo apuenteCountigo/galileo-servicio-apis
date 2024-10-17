@@ -20,7 +20,6 @@ public interface ObjetivoRepository extends CrudRepository<Objetivos, Long> {
 
     Objetivos findObjetivosByDescripcion(String descripcion);
 
-    // @Query("SELECT o FROM Objetivos o WHERE o.descripcion = :descripcion AND
-    // o.balizas.Id = :idBaliza")
-    // Objetivos findByDescripcionAndBalizasId(String descripcion, Long idBaliza);
+    @Query("SELECT o FROM Objetivos o WHERE o.descripcion = :descripcion AND o.balizas.Id = :idBaliza")
+    Objetivos searchByDescripcionAndIdBaliza(String descripcion, Long idBaliza);
 }
