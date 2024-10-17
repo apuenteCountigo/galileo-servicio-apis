@@ -938,8 +938,10 @@ public class ApiControlador {
                 }
                 case 10 -> {
                     valorEstado = 7;
-                    objetivo.setBalizas(baliza);
-                    asignarBalizaObj(objetivo);
+                    if (objetivo != null) {
+                        objetivo.setBalizas(baliza);
+                        asignarBalizaObj(objetivo);
+                    }
                 }
                 case 11 -> {
                     valorEstado = 3;
