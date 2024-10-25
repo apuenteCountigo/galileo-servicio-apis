@@ -812,27 +812,34 @@ public class ApiControlador {
             operacion.setIdDataminer(String.valueOf(connectAppResultDataMiner.getD().getDataMinerID()));
             operacion.setIdElement(String.valueOf(connectAppResultDataMiner.getD().getID()));
 
-            // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
-
-            try {
-                GroupTraccar groupTraccar = new GroupTraccar();
-                groupTraccar.setName(operacion.getDescripcion());
-                operacion.setIdGrupo(Long.valueOf(apisServicio
-                        .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
-            } catch (Exception exception) {
-                log.error("ERROR CREANDO GRUPO EN TRACCAR..." + exception);
-                throw new RuntimeException("Error creando grupo en TRACCAR...");
-            }
-
-            return ResponseEntity.ok().body(operacion);
         } catch (Exception exception) {
-            log.error("ERROR EN DATAMINER SALVANDO OPERACION :" + exception);
-            if (exception.getMessage().contains("Element could not be created")) {
-                throw new RuntimeException(
-                        "Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...");
+            String err = "Fallo salvando operacion en DATAMINER...";
+            if (exception.getMessage().contains("Element could not be created: Invalid data")) {
+                err = "Fallo creando operación en Dataminer: La operación ya existe";
+                log.error("{} : {}", err, exception);
+                throw new RuntimeException(err);
+            } else if (exception.getMessage().contains("Element could not be created")) {
+                err = "Error salvando operacion en DATAMINER, se ha excedido la cantidad de elementos en el DataMiner...";
+                log.error("{} : {}", err, exception);
+                throw new RuntimeException(err);
             }
-            throw new RuntimeException("Error salvando operacion en DATAMINER...");
+            log.error("{} : {}", err, exception);
+            throw new RuntimeException(err);
         }
+
+        // CREAR GRUPO EN TRACCAR Y ASIGNAR ID A OPERACION
+        try {
+            GroupTraccar groupTraccar = new GroupTraccar();
+            groupTraccar.setName(operacion.getDescripcion());
+            operacion.setIdGrupo(Long.valueOf(apisServicio
+                    .crearGrupoTraccar(obtenerUriTraccar(), groupTraccar, obtenerAutorizacionTraccar()).getId()));
+        } catch (Exception exception) {
+            String err = "ERROR CREANDO GRUPO EN TRACCAR...";
+            log.error("{} : {}", err, exception);
+            throw new RuntimeException(err);
+        }
+
+        return ResponseEntity.ok().body(operacion);
     }
 
     /**
