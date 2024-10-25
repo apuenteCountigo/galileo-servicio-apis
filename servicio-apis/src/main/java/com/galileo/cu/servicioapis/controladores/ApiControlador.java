@@ -66,7 +66,7 @@ public class ApiControlador {
     public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
 
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
                     obtenerAutorizacionTraccar());
             System.out.println(stringResponseEntity.getBody());
         } catch (Exception e) {
@@ -2670,9 +2670,58 @@ public class ApiControlador {
      *
      */
 
+    // Metodo para obtener la URI mapa de Traccar
+    private URI obtenerUriTraccarMap() {
+        Conexiones conexiones = null;
+
+        try {
+            conexiones = encontrarConexion("TRACCAR");
+        } catch (Exception e) {
+            String err = "Fallo consultando en la BD, la conexión al servidor Traccar";
+            log.error("{} : {}", err, e);
+            throw new RuntimeException(err);
+        }
+
+        if (conexiones == null) {
+            String err = "Fallo, no existe una conexión para el servidor Traccar";
+            log.error(err);
+            throw new RuntimeException(err);
+        }
+
+        String ipHost = conexiones.getMapAddress();
+        String puerto = conexiones.getPuerto();
+        String uriBuild = (!Strings.isNullOrEmpty(ipHost)
+                && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
+                + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
+
+        URI uri = null;
+        try {
+            uri = new URI(uriBuild);
+        } catch (URISyntaxException e) {
+            log.error("Error confeccioando la URI de TRACCAR: {}", e.getMessage());
+        }
+
+        return uri;
+    }
+
     // Metodo para obtener la URI de Traccar
     private URI obtenerUriTraccar() {
-        Conexiones conexiones = encontrarConexion("TRACCAR");
+        Conexiones conexiones = null;
+
+        try {
+            conexiones = encontrarConexion("TRACCAR");
+        } catch (Exception e) {
+            String err = "Fallo consultando en la BD, la conexión al servidor Traccar";
+            log.error("{} : {}", err, e);
+            throw new RuntimeException(err);
+        }
+
+        if (conexiones == null) {
+            String err = "Fallo, no existe una conexión para el servidor Traccar";
+            log.error(err);
+            throw new RuntimeException(err);
+        }
+
         String ipHost = conexiones.getIpServicio();
         String puerto = conexiones.getPuerto();
         String uriBuild = (!Strings.isNullOrEmpty(ipHost)
