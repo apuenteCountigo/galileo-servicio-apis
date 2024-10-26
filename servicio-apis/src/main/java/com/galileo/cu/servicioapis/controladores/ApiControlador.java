@@ -2689,16 +2689,21 @@ public class ApiControlador {
         }
 
         String ipHost = conexiones.getMapAddress();
-        String puerto = conexiones.getPuerto();
-        String uriBuild = (!Strings.isNullOrEmpty(ipHost)
-                && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
-                + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
+        if (Strings.isNullOrEmpty(ipHost)) {
+            String err = "Fallo, no existe una dirección para el mapa del servidor Traccar";
+            log.error(err);
+            throw new RuntimeException(err);
+        }
+
+        String uriBuild = ipHost;
 
         URI uri = null;
         try {
             uri = new URI(uriBuild);
         } catch (URISyntaxException e) {
-            log.error("Error confeccioando la URI de TRACCAR: {}", e.getMessage());
+            String err = "Fallo confeccioando la URI del mapa, del servidor Traccar";
+            log.error("{} : {}", err, e);
+            throw new RuntimeException(err);
         }
 
         return uri;
@@ -2723,6 +2728,12 @@ public class ApiControlador {
         }
 
         String ipHost = conexiones.getIpServicio();
+        if (Strings.isNullOrEmpty(ipHost)) {
+            String err = "Fallo, no existe una dirección para consumir la api del servidor Traccar";
+            log.error(err);
+            throw new RuntimeException(err);
+        }
+
         String puerto = conexiones.getPuerto();
         String uriBuild = (!Strings.isNullOrEmpty(ipHost)
                 && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
