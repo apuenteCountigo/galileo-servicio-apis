@@ -66,7 +66,7 @@ public class ApiControlador {
     public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
 
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
                     obtenerAutorizacionTraccar());
             System.out.println(stringResponseEntity.getBody());
         } catch (Exception e) {
