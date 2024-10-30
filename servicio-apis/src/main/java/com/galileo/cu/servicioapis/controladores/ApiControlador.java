@@ -2671,43 +2671,44 @@ public class ApiControlador {
      */
 
     // Metodo para obtener la URI mapa de Traccar
-    private URI obtenerUriTraccarMap() {
-        Conexiones conexiones = null;
+    // private URI obtenerUriTraccarMap() {
+    // Conexiones conexiones = null;
 
-        try {
-            conexiones = encontrarConexion("TRACCAR");
-        } catch (Exception e) {
-            String err = "Fallo consultando en la BD, la conexión al servidor Traccar";
-            log.error("{} : {}", err, e);
-            throw new RuntimeException(err);
-        }
+    // try {
+    // conexiones = encontrarConexion("TRACCAR");
+    // } catch (Exception e) {
+    // String err = "Fallo consultando en la BD, la conexión al servidor Traccar";
+    // log.error("{} : {}", err, e);
+    // throw new RuntimeException(err);
+    // }
 
-        if (conexiones == null) {
-            String err = "Fallo, no existe una conexión para el servidor Traccar";
-            log.error(err);
-            throw new RuntimeException(err);
-        }
+    // if (conexiones == null) {
+    // String err = "Fallo, no existe una conexión para el servidor Traccar";
+    // log.error(err);
+    // throw new RuntimeException(err);
+    // }
 
-        String ipHost = conexiones.getMapAddress();
-        if (Strings.isNullOrEmpty(ipHost)) {
-            String err = "Fallo, no existe una dirección para el mapa del servidor Traccar";
-            log.error(err);
-            throw new RuntimeException(err);
-        }
+    // String ipHost = conexiones.getMapAddress();
+    // if (Strings.isNullOrEmpty(ipHost)) {
+    // String err = "Fallo, no existe una dirección para el mapa del servidor
+    // Traccar";
+    // log.error(err);
+    // throw new RuntimeException(err);
+    // }
 
-        String uriBuild = ipHost;
+    // String uriBuild = ipHost;
 
-        URI uri = null;
-        try {
-            uri = new URI(uriBuild);
-        } catch (URISyntaxException e) {
-            String err = "Fallo confeccioando la URI del mapa, del servidor Traccar";
-            log.error("{} : {}", err, e);
-            throw new RuntimeException(err);
-        }
+    // URI uri = null;
+    // try {
+    // uri = new URI(uriBuild);
+    // } catch (URISyntaxException e) {
+    // String err = "Fallo confeccioando la URI del mapa, del servidor Traccar";
+    // log.error("{} : {}", err, e);
+    // throw new RuntimeException(err);
+    // }
 
-        return uri;
-    }
+    // return uri;
+    // }
 
     // Metodo para obtener la URI de Traccar
     private URI obtenerUriTraccar() {
