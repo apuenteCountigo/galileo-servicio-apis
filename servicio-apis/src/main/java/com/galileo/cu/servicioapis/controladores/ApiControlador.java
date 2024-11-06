@@ -68,7 +68,7 @@ public class ApiControlador {
         try {
             ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
                     obtenerAutorizacionTraccar());
-            System.out.println(stringResponseEntity.getBody());
+            log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
             log.error("No existe conexion con el servidor TRACCAR, verificar la configuracion: {}", e.getMessage());
             if (e.getMessage().contains("Connection refused")) {
@@ -157,7 +157,7 @@ public class ApiControlador {
 
         try {
 
-            String urlBuild = obtenerUriTraccar() + "/?token=" + decodificarToken.getTraccar();
+            String urlBuild = obtenerUriTraccarMap() + "/?token=" + decodificarToken.getTraccar();
             url = new URL(urlBuild);
             return ResponseEntity.status(HttpStatus.OK).body(url);
         } catch (MalformedURLException e) {
