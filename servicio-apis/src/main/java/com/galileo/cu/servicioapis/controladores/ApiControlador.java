@@ -2698,7 +2698,9 @@ public class ApiControlador {
         String puerto = conexiones.getPuerto();
         String uriBuild = (!Strings.isNullOrEmpty(ipHost)
                 && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
-                + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
+                + (!Strings.isNullOrEmpty(puerto) && !ipHost.contains("http://") && !ipHost.contains("https://")
+                        ? ":" + puerto
+                        : "");
 
         URI uri = null;
         try {
