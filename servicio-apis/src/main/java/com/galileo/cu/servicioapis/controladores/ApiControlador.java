@@ -71,7 +71,7 @@ public class ApiControlador {
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
             log.error("No existe conexion con el servidor TRACCAR, verificar la configuracion: {}", e.getMessage());
-            if (e.getMessage().contains("Connection refused")) {
+            if (e.getMessage().contains("Connection refused") || e.getMessage().contains("Connect timed out")) {
                 new RuntimeException(
                         "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR ");
             }
