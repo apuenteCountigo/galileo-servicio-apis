@@ -70,11 +70,9 @@ public class ApiControlador {
                     obtenerAutorizacionTraccar());
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
-            log.error("No existe conexion con el servidor TRACCAR, verificar la configuracion: {}", e.getMessage());
-            if (e.getMessage().contains("Connection refused") || e.getMessage().contains("Connect timed out")) {
-                new RuntimeException(
-                        "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR ");
-            }
+            String err = "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR";
+            log.error("{}: {}", err, e.getMessage());
+            throw new RuntimeException(err);
         }
 
         URL url = null;
