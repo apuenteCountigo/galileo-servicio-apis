@@ -71,8 +71,12 @@ public class ApiControlador {
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
             String err = "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR";
-            log.error("{}: {}", err, e.getMessage());
-            throw new RuntimeException(err);
+            if (e.getMessage().contains("405 Method Not Allowed")) {
+                log.info("Conexión a Traccar verificada....");
+            } else {
+                log.error("{}: {}", err, e.getMessage());
+                throw new RuntimeException(err);
+            }
         }
 
         URL url = null;
@@ -84,6 +88,7 @@ public class ApiControlador {
             usuario = apisServicio.findUsuarioByIdServ(decodificarToken.getId()).get();
         } catch (Exception exception) {
             log.error("Error consultando usuarios para mostrar mapa...{}", exception.getMessage());
+            throw new RuntimeException("Error consultando usuarios para mostrar mapa");
         }
 
         try {
@@ -148,9 +153,12 @@ public class ApiControlador {
             }
         } catch (Exception exception) {
             if (exception.getMessage().contains("404 - Not Found")) {
-                log.error("No existe el usuario: {} en TRACCAR", usuario.getTip());
-            } else
-                log.error(exception.getMessage());
+                log.error("Fallo, no existe el usuario: {} en TRACCAR", usuario.getTip());
+                throw new RuntimeException("Fallo, no existe el usuario: " + usuario.getTip() + " en TRACCAR");
+            } else {
+                log.error("Fallo verificando usuario en Traccar: {}", exception.getMessage());
+                throw new RuntimeException("Fallo verificando usuario en Traccar.");
+            }
         }
 
         try {
