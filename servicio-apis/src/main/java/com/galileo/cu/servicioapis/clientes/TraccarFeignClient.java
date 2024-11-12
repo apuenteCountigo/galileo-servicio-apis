@@ -10,7 +10,7 @@ import java.util.List;
 @FeignClient(name = "traccar", url = "EMPTY")
 public interface TraccarFeignClient {
     // https://api.restful-api.dev/objects
-    @PostMapping("/objects")
+    @GetMapping("/objects")
     ResponseEntity<String> testHTTPS(URI uri);
 
     @PostMapping("/api/server")
