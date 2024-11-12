@@ -79,7 +79,7 @@ public class ApiControlador {
         // }
 
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
                     obtenerAutorizacionTraccar());
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
