@@ -68,14 +68,15 @@ public class ApiControlador {
     @GetMapping("/mostrarMapaTraccar")
     public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
         // https://api.restful-api.dev/
-        try {
-            ResponseEntity<String> res = traccarFeignClient.testHTTPS(new URI("https://api.restful-api.dev"));
-            log.info(res.getBody());
-            throw new RuntimeException(res.getBody());
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            log.error("Fallo haciendo Test HTTPS: {}", e);
-        }
+        // try {
+        // ResponseEntity<String> res = traccarFeignClient.testHTTPS(new
+        // URI("https://api.restful-api.dev"));
+        // log.info(res.getBody());
+        // throw new RuntimeException(res.getBody());
+        // } catch (URISyntaxException e) {
+        // // TODO Auto-generated catch block
+        // log.error("Fallo haciendo Test HTTPS: {}", e);
+        // }
 
         try {
             ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
