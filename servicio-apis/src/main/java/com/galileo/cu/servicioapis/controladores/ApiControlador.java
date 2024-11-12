@@ -1,6 +1,7 @@
 package com.galileo.cu.servicioapis.controladores;
 
 import com.galileo.cu.commons.models.*;
+import com.galileo.cu.servicioapis.clientes.TraccarFeignClient;
 import com.galileo.cu.servicioapis.entidades.*;
 import com.galileo.cu.servicioapis.repositorios.BalizaRepository;
 import com.galileo.cu.servicioapis.repositorios.ObjetivoRepository;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @CrossOrigin
 @Log4j2
 public class ApiControlador {
+    private final TraccarFeignClient traccarFeignClient;
     private final BalizaRepository balizaRepository;
 
     private final ApisServicio apisServicio;
@@ -44,12 +46,13 @@ public class ApiControlador {
     @Autowired
     public ApiControlador(ApisServicio apisServicio, OperacionRepository operacionRepository,
             ObjetivoRepository objetivoRepository, ConexionService conexionService,
-            BalizaRepository balizaRepository) {
+            BalizaRepository balizaRepository, TraccarFeignClient traccarFeignClient) {
         this.apisServicio = apisServicio;
         this.operacionRepository = operacionRepository;
         this.objetivoRepository = objetivoRepository;
         this.conexionService = conexionService;
         this.balizaRepository = balizaRepository;
+        this.traccarFeignClient = traccarFeignClient;
     }
 
     // ************************************************************************************//
@@ -64,6 +67,15 @@ public class ApiControlador {
      */
     @GetMapping("/mostrarMapaTraccar")
     public ResponseEntity<URL> mostrarMapaTraccar(@RequestParam("token") String tokenUser) {
+        // https://api.restful-api.dev/
+        try {
+            ResponseEntity<String> res = traccarFeignClient.testHTTPS(new URI("https://api.restful-api.dev"));
+            log.info(res.getBody());
+            throw new RuntimeException(res.getBody());
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            log.error("Fallo haciendo Test HTTPS: {}", e);
+        }
 
         try {
             ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
