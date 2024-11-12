@@ -22,7 +22,7 @@ public class ServicioApisApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         System.out.println("**************************************");
-        System.out.println("APIS V-1.1.2 24-11-05 16:09");
+        System.out.println("APIS V-1.1.2 24-11-12 15:39");
     }
 
 }
