@@ -12,10 +12,10 @@ import java.io.FileInputStream;
 import java.security.KeyStore;
 
 @Log4j2
-@Configuration
+// @Configuration
 public class FeignClientConfig {
 
-    @Bean
+    // @Bean
     public Client feignClient() throws Exception {
         // Cargar el truststore
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
