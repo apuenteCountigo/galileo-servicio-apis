@@ -79,7 +79,7 @@ public class ApiControlador {
         // }
 
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccarMap(),
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
                     obtenerAutorizacionTraccar());
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class ApiControlador {
         }
 
         try {
-            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(),
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccarMap(),
                     Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar());
 
             if (usuarioTraccar != null) {
