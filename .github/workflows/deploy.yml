@@ -58,6 +58,8 @@ jobs:
             cd servicio-apis &&
             export PATH=/opt/maven/bin:$PATH && mvn clean install -DskipTests &&
             mv ./target/servicio-apis-0.0.1-SNAPSHOT.jar ../../servicio-apis.jar &&
+            cp ./Dockerfile ../../Dockerfile &&
+            cp ./src/main/resources/keystore.jks ../../keystore.jks &&
             cd ../../../ &&
             CONTAINER_NAME="servicio-apis" &&
             IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "$CONTAINER_NAME") &&
