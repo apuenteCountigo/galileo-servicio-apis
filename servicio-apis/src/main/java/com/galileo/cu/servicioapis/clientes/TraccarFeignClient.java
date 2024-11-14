@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
-@FeignClient(name = "traccar", url = "EMPTY", configuration = FeignClientConfig.class)
+@FeignClient(name = "traccar", url = "EMPTY")
 public interface TraccarFeignClient {
         // https://api.restful-api.dev/objects
         @GetMapping("/objects")

@@ -1,6 +1,9 @@
 package com.galileo.cu.servicioapis.clientes;
 
 import feign.Client;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,6 +11,7 @@ import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 
+@Log4j2
 @Configuration
 public class FeignClientConfig {
 
@@ -17,6 +21,8 @@ public class FeignClientConfig {
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         try (FileInputStream trustStoreStream = new FileInputStream("/app/resources/keystore.jks")) {
             trustStore.load(trustStoreStream, "GalileoTraccar".toCharArray());
+        } catch (Exception e) {
+            log.error("Fallo en el trustStore: {}", e);
         }
 
         // Inicializar TrustManager
