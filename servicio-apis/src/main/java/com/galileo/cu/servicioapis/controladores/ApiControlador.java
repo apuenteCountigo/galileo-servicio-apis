@@ -105,7 +105,7 @@ public class ApiControlador {
         }
 
         try {
-            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccarMap(),
+            UsuarioTraccar usuarioTraccar = apisServicio.obtenerUsuarioTraccarServ(obtenerUriTraccar(),
                     Math.toIntExact(usuario.getTraccarID()), obtenerAutorizacionTraccar());
 
             if (usuarioTraccar != null) {
