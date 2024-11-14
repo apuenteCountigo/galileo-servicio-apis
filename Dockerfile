@@ -1,18 +1,19 @@
 # Usa la imagen base de OpenJDK
 FROM openjdk:17-alpine
 
-# Configura la ubicación del keystore y copia el archivo en el contenedor
-ENV KEYSTORE_PATH="/usr/local/lib/security/keystore.jks"
-COPY ./keystore.jks ${KEYSTORE_PATH}
+# Establece variables de entorno para el truststore
+ENV JAVA_OPTS="-Djavax.net.ssl.trustStore=/app/resources/keystore.jks -Djavax.net.ssl.trustStorePassword=GalileoTraccar"
 
-# Configura JAVA_OPTS para que Java use el almacén de certificados de la JVM
-ENV JAVA_OPTS="-Djavax.net.ssl.trustStore=${KEYSTORE_PATH} -Djavax.net.ssl.trustStorePassword=GalileoTraccar"
+# Crea un directorio para la aplicación
+WORKDIR /app
+
+COPY ./keystore.jks /app/resources/keystore.jks
 
 # Crear un volumen temporal
-VOLUME /tmp
+#VOLUME /tmp
 
 # Copiar el archivo JAR de la aplicación
-COPY ./servicio-apis.jar /servicio-apis.jar
+COPY ./servicio-apis.jar /app/servicio-apis.jar
 
 # Usa JAVA_OPTS en el comando de inicio para asegurarse de que se aplica al proceso
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /servicio-apis.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/servicio-apis.jar"]
