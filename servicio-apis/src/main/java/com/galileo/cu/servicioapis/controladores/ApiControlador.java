@@ -948,7 +948,7 @@ public class ApiControlador {
 
             Objetivos objetivo = null;
             if (baliza.getObjetivo() != null && !baliza.getObjetivo().isBlank()) {
-                objetivo = objetivoRepository.searchByDescripcionAndIdBaliza(baliza.getObjetivo(), baliza.getId());
+                objetivo = objetivoRepository.findObjetivosByDescripcion(baliza.getObjetivo());
                 log.info(objetivo.getDescripcion());
             }
 
