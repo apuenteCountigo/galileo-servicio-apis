@@ -949,11 +949,13 @@ public class ApiControlador {
             Objetivos objetivo = null;
             if (baliza.getObjetivo() != null && !baliza.getObjetivo().isBlank()) {
                 objetivo = objetivoRepository.searchByDescripcionAndIdBaliza(baliza.getObjetivo(), baliza.getId());
+                log.info(objetivo.getDescripcion());
             }
 
             Integer valorEstado = null;
 
-            log.info("ESTADO DE LA BALIZA {} ES: {}", baliza.getClave(), baliza.getEstados().getId());
+            log.info("ESTADO DE LA BALIZA {} ES: {}, OBJ: {}", baliza.getClave(), baliza.getEstados().getId(),
+                    baliza.getObjetivo());
             switch (Math.toIntExact(baliza.getEstados().getId())) {
                 case 8 -> valorEstado = 1;
                 case 9 -> {
