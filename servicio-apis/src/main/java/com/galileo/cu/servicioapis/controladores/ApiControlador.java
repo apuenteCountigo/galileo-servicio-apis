@@ -953,6 +953,7 @@ public class ApiControlador {
 
             Integer valorEstado = null;
 
+            log.info("ESTADO DE LA BALIZA {} ES: {}", baliza.getClave(), baliza.getEstados().getId());
             switch (Math.toIntExact(baliza.getEstados().getId())) {
                 case 8 -> valorEstado = 1;
                 case 9 -> {
