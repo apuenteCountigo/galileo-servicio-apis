@@ -967,6 +967,8 @@ public class ApiControlador {
                     valorEstado = 7;
                     if (objetivo != null) {
                         objetivo.setBalizas(baliza);
+                        log.info("Baliza: {}, OP: {}, OB: {}", baliza.getClave(), baliza.getOperacion(),
+                                baliza.getObjetivo());
                         asignarBalizaObj(objetivo);
                     }
                 }
