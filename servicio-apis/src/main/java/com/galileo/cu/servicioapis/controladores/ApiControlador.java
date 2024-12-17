@@ -953,10 +953,12 @@ public class ApiControlador {
 
             Integer valorEstado = null;
 
-            log.info("ESTADO DE LA BALIZA {} ES: {}", baliza.getClave(), baliza.getEstados().getId());
+            log.info("ESTADO DE LA BALIZA {} ES: {}, {}", baliza.getClave(), baliza.getEstados().getId(),
+                    Math.toIntExact(baliza.getEstados().getId()));
             switch (Math.toIntExact(baliza.getEstados().getId())) {
                 case 8 -> valorEstado = 1;
                 case 9 -> {
+                    log.info("CASO 9");
                     valorEstado = 6;
                     if (objetivo != null) {
                         objetivo.setBalizas(null);
@@ -964,6 +966,7 @@ public class ApiControlador {
                     }
                 }
                 case 10 -> {
+                    log.info("CASO 10");
                     valorEstado = 7;
                     if (objetivo != null) {
                         objetivo.setBalizas(baliza);
@@ -973,6 +976,7 @@ public class ApiControlador {
                     }
                 }
                 case 11 -> {
+                    log.info("CASO 11");
                     valorEstado = 3;
                     if (objetivo != null) {
                         objetivo.setBalizas(null);
@@ -980,6 +984,7 @@ public class ApiControlador {
                     }
                 }
                 case 12 -> {
+                    log.info("CASO 12");
                     valorEstado = 4;
                     if (objetivo != null) {
                         objetivo.setBalizas(null);
@@ -987,6 +992,7 @@ public class ApiControlador {
                     }
                 }
                 case 18 -> {
+                    log.info("CASO 18");
                     valorEstado = 5;
                     // DESASIGNAR BALIZA A OPERACION
                     try {
