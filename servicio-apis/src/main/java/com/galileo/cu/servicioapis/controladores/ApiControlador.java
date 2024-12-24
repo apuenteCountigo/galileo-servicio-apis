@@ -78,11 +78,31 @@ public class ApiControlador {
         // log.error("Fallo haciendo Test HTTPS: {}", e);
         // }
 
+        URI uriTraccar = null;
+        String oauthTraccar = "";
+
         try {
-            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(obtenerUriTraccar(),
-                    obtenerAutorizacionTraccar());
+            uriTraccar = obtenerUriTraccar();
+        } catch (Exception e) {
+            String err = "***** ERROR obtenerUriTraccar, ";
+            log.error("{}: {}", err, e.getMessage());
+            throw new RuntimeException(err);
+        }
+
+        try {
+            oauthTraccar = obtenerAutorizacionTraccar();
+        } catch (Exception e) {
+            String err = "***** ERROR obtenerAutorizacionTraccar, ";
+            log.error("{}: {}", err, e.getMessage());
+            throw new RuntimeException(err);
+        }
+
+        try {
+            ResponseEntity<String> stringResponseEntity = apisServicio.estadoServerTraccarServ(uriTraccar,
+                    oauthTraccar);
             log.info(stringResponseEntity.getBody());
         } catch (Exception e) {
+            log.error("##### error {}", e.getMessage());
             String err = "No existe conexión con el servidor de TRACCAR, verifique su conexión o los datos de configuración al servidor TRACCAR";
             if (e.getMessage().contains("405 Method Not Allowed")) {
                 log.info("Conexión a Traccar verificada....");
