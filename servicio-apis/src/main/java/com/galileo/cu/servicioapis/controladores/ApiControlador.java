@@ -2772,6 +2772,7 @@ public class ApiControlador {
         String uriBuild = (!Strings.isNullOrEmpty(ipHost)
                 && (!ipHost.contains("http://") && !ipHost.contains("https://")) ? "http://" : "") + ipHost
                 + (!Strings.isNullOrEmpty(puerto) ? ":" + puerto : "");
+        log.info("uriBuild:= {}", uriBuild);
 
         URI uri = null;
         try {
@@ -2791,6 +2792,7 @@ public class ApiControlador {
         String password = conexiones.getPassword();
         byte[] encodedBytes = Base64Utils.encode((username + ":" + password).getBytes());
         String authHeader = "Basic " + new String(encodedBytes);
+        log.info("@@@@@@@ obtenerAutorizacionTraccar: Usu: {}, Pass: {}", username, password);
         return authHeader;
     }
 
