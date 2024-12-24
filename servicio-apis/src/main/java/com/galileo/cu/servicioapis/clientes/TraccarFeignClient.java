@@ -13,7 +13,7 @@ public interface TraccarFeignClient {
         @GetMapping("/objects")
         ResponseEntity<String> testHTTPS(URI uri);
 
-        @PostMapping("/api/server")
+        @GetMapping("/api/server")
         ResponseEntity<String> estadoServerTraccar(URI uri, @RequestHeader("Authorization") String authHeader);
 
         @PostMapping("/api/users")
