@@ -738,7 +738,8 @@ public class ApiControlador {
             ArrayList<PortsDataMiner> ports = new ArrayList<>();
             ports.add(portsDataMiner);
             ports.add(portsDataMiner1);
-            ConfiguracionDataMiner configuracionDataMiner = new ConfiguracionDataMiner(
+            ConfigurationBalizaDMA configuracionDataMiner = new ConfigurationBalizaDMA(
+                    "Galielo",
                     baliza.getClave(),
                     "Description Text",
                     "Innova PR400",
@@ -747,9 +748,10 @@ public class ApiControlador {
                     ports);
             ArrayList<Integer> arrayView = new ArrayList<>();
             arrayView.add(conexiones.getViewIDs());
-            DataMiner dataMiner = new DataMiner(idConnect, conexiones.getDmaID(), arrayView, configuracionDataMiner);
+            DataMinerBaliza dataMiner = new DataMinerBaliza(idConnect, conexiones.getDmaID(), arrayView,
+                    configuracionDataMiner);
 
-            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerServ(uri,
+            ConnectAppResultDataMiner connectAppResultDataMiner = apisServicio.salvarElementoDataMinerBalizaServ(uri,
                     dataMiner);
 
             // AGREGAR A BALIZA:
