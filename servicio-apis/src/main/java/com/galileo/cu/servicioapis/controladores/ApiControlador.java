@@ -739,7 +739,7 @@ public class ApiControlador {
             ports.add(portsDataMiner);
             ports.add(portsDataMiner1);
             ConfigurationBalizaDMA configuracionDataMiner = new ConfigurationBalizaDMA(
-                    "Galielo",
+                    "Galileo",
                     baliza.getClave(),
                     "Description Text",
                     "Innova PR400",
